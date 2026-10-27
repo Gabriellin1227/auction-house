@@ -1,0 +1,59 @@
+{
+  "name": "auction-house",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "prepare": "husky",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "backend:lint": "node scripts/uv.mjs run --project backend --locked ruff check backend",
+    "backend:format:check": "node scripts/uv.mjs run --project backend --locked ruff format --check backend",
+    "backend:test": "node scripts/uv.mjs run --project backend --locked pytest -c backend/pyproject.toml",
+    "check:frontend": "npm run format:check && npm run lint && npm run typecheck && npm test",
+    "check:backend": "npm run backend:lint && npm run backend:format:check && npm run backend:test",
+    "check": "npm run check:frontend && npm run check:backend",
+    "setup:backend": "node scripts/uv.mjs sync --project backend --locked --python 3.12"
+  },
+  "lint-staged": {
+    "*.{js,mjs,ts,tsx}": [
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml,css,html}": "prettier --write",
+    "backend/**/*.py": [
+      "node scripts/uv.mjs run --project backend --locked ruff check --fix",
+      "node scripts/uv.mjs run --project backend --locked ruff format"
+    ]
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.4",
+    "@commitlint/config-conventional": "^21.2.4",
+    "@eslint/js": "^10.0.1",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "eslint": "^10.13.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.13.0",
+    "husky": "^9.1.7",
+    "jsdom": "^29.1.1",
+    "lint-staged": "^17.6.0",
+    "prettier": "^3.9.10",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}

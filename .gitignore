@@ -1,0 +1,15 @@
+node_modules/
+.husky/_/
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+coverage/
+.coverage
+htmlcov/
+dist/
+.env
+.env.*
+!.env.example
+.tools/

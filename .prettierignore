@@ -1,0 +1,7 @@
+node_modules
+.husky/_
+backend/.venv
+backend/uv.lock
+coverage
+dist
+.tools
