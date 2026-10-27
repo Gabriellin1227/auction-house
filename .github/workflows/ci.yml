@@ -22,10 +22,28 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check:frontend
+      - run: npm run build
   backend:
     name: Backend quality and tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      DATABASE_URL: postgresql+psycopg://auction:auction_ci@localhost:5432/auction_test
+      TEST_DATABASE_URL: postgresql+psycopg://auction:auction_ci@localhost:5432/auction_test
+    services:
+      postgres:
+        image: postgres:17.9-alpine
+        env:
+          POSTGRES_USER: auction
+          POSTGRES_PASSWORD: auction_ci
+          POSTGRES_DB: auction_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U auction -d auction_test"
+          --health-interval=3s
+          --health-timeout=3s
+          --health-retries=20
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -37,6 +55,8 @@ jobs:
       - run: uv sync --project backend --locked --python 3.12
       - run: uv run --project backend --locked ruff check backend
       - run: uv run --project backend --locked ruff format --check backend
+      - run: uv run --project backend --locked alembic -c backend/alembic.ini upgrade head
+      - run: uv run --project backend --locked alembic -c backend/alembic.ini check
       - run: uv run --project backend --locked pytest -c backend/pyproject.toml
   commits:
     name: Commit messages

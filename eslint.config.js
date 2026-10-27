@@ -9,6 +9,7 @@ export default tseslint.config(
       'backend/.venv/**',
       'coverage/**',
       'dist/**',
+      'frontend/dist/**',
       '.husky/_/**',
     ],
   },

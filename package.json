@@ -20,7 +20,20 @@
     "check:frontend": "npm run format:check && npm run lint && npm run typecheck && npm test",
     "check:backend": "npm run backend:lint && npm run backend:format:check && npm run backend:test",
     "check": "npm run check:frontend && npm run check:backend",
-    "setup:backend": "node scripts/uv.mjs sync --project backend --locked --python 3.12"
+    "setup:backend": "node scripts/uv.mjs sync --project backend --locked --python 3.12",
+    "db:up": "docker compose up -d --wait db",
+    "db:migrate": "node scripts/uv.mjs run --project backend --locked alembic -c backend/alembic.ini upgrade head",
+    "db:current": "node scripts/uv.mjs run --project backend --locked alembic -c backend/alembic.ini current",
+    "db:check": "node scripts/uv.mjs run --project backend --locked alembic -c backend/alembic.ini check",
+    "db:test": "docker compose --profile test run --rm --build test",
+    "docker:up": "docker compose up -d --build --wait api frontend",
+    "docker:down": "docker compose down",
+    "setup:env": "node scripts/init-env.mjs",
+    "db:seed": "node scripts/uv.mjs run --directory backend --locked python -m app.seed --demo",
+    "docker:seed": "docker compose run --rm migrate python -m app.seed --demo",
+    "dev": "vite --config frontend/vite.config.ts",
+    "build": "npm run typecheck && vite build --config frontend/vite.config.ts",
+    "preview": "vite preview --config frontend/vite.config.ts"
   },
   "lint-staged": {
     "*.{js,mjs,ts,tsx}": [
@@ -39,8 +52,10 @@
     "@eslint/js": "^10.0.1",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
+    "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
     "eslint": "^10.13.0",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.13.0",
@@ -50,6 +65,7 @@
     "prettier": "^3.9.10",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.72.1",
+    "vite": "^8.3.5",
     "vitest": "^5.0.5"
   },
   "dependencies": {

@@ -1,6 +1,49 @@
 # Auction House
 
-Casa de leilões — teste técnico Verzel. Base inicial de qualidade e testes para React/TypeScript e FastAPI/Python; as funcionalidades de leilão ainda serão implementadas.
+Casa de leilões — teste técnico Verzel. Base com PostgreSQL, modelos SQLAlchemy, migrations Alembic, Docker Compose e automações de qualidade para React/TypeScript e FastAPI/Python. As funcionalidades de leilão ainda serão implementadas.
+
+## Frontend Yorknew
+
+O visual de `yorknew-auction.zip` foi integrado em `frontend/src` com Vite, mantendo React/TypeScript e as automações da raiz. Há um único package-lock.json para JavaScript e uv.lock separado para Python.
+
+```sh
+npm ci
+npm run dev
+```
+
+Abra http://localhost:5173. Para login/cadastro reais, mantenha FastAPI em localhost:8000; o Vite encaminha `/api` ao backend removendo esse prefixo. Use as contas demo abaixo ou cadastre uma conta. O token fica apenas na memória: atualizar a página exige novo login.
+
+O catálogo está em modo demonstrativo por padrão, identificado na tela; busca, categorias e detalhes funcionam com os dados do ZIP. Lotes/lances reais ainda dependem das próximas entregas. Newsletter não está ativa. O ZIP não continha imagens; um placeholder local foi incluído.
+
+Configuração opcional em frontend/.env (base em frontend/.env.example): VITE_API_URL=/api e VITE_USE_MOCK=true. Mudar para false exige implementar os endpoints de categorias, lotes e estatísticas. Não há fallback silencioso para dados fictícios quando a API real falha.
+
+Build: `npm run build`; preview do build: `npm run preview` (a prévia estática não inclui o proxy de desenvolvimento). O CI verifica também o build. No Docker, `npm run docker:up` sobe API, banco e frontend; abra http://localhost:5174. O Nginx encaminha `/api` à API no ambiente Docker.
+
+## Banco e API com Docker
+
+```sh
+npm run setup:env
+npm run docker:up
+npm run docker:seed
+```
+
+Requer Docker e Compose. PostgreSQL aguarda ficar saudável, Alembic aplica migrations e FastAPI sobe em http://localhost:8000/docs. Dados persistem em volumes nomeados. Para parar preservando dados: `npm run docker:down`.
+
+Detalhes de banco, migrations, volumes, testes e preparação do Neon: [guia da entrega 1](docs/banco-e-docker.md). Decisões e próximas etapas: [roteiro](docs/roteiro.md).
+
+Para testar as restrições em PostgreSQL real: `npm run db:test`. O CI também executa esses testes. Sem `TEST_DATABASE_URL`, os testes de integração são marcados como skipped no fluxo local.
+
+## CRUD e login para testar
+
+A API já permite cadastro com carteira, login, consulta/edição do perfil e inativação da própria conta. Há também consulta da carteira e resumo restrito ao leiloeiro. Guia com rotas, exemplos e passo a passo no Swagger: [CRUD inicial](docs/crud-inicial.md).
+
+Após rodar `npm run docker:seed`, use no **Authorize** de http://localhost:8000/docs:
+
+- `leiloeiro@example.com` (auctioneer)
+- `cliente1@example.com` e `cliente2@example.com` (bidder)
+- Senha pública de demonstração para os três: `DemoAuction2026!`
+
+Seed não altera contas existentes nem cria lote fictício. O lote de demonstração será importado da API pública na etapa seguinte. Tokens expiram em 30 minutos e exigem AUTH_SECRET privada; `setup:env` gera a chave localmente.
 
 ## Preparação
 
@@ -41,6 +84,6 @@ Os hooks validam commits feitos por você; eles não criam commits nem fazem pus
 | `node scripts/uv.mjs run --project backend ruff format backend`                             | Formatar Python                    |
 | `node scripts/uv.mjs run --project backend uvicorn app.main:app --app-dir backend --reload` | Iniciar API                        |
 
-A API expõe `GET /health`. Os testes iniciais verificam o ambiente React/DOM e o endpoint público de saúde. Testes das regras de leilão serão adicionados com a implementação.
+A API expõe `GET /health` e `GET /ready` (conexão PostgreSQL). Os testes iniciais verificam o ambiente React/DOM e o endpoint público de saúde. Testes das regras de leilão serão adicionados com a implementação.
 
 As dependências estão fixadas em `package-lock.json` e `backend/uv.lock`. Para adicionar pacotes Python, use `node scripts/uv.mjs add --project backend nome-do-pacote` e inclua o lock atualizado no commit.
