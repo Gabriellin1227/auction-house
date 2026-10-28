@@ -7,8 +7,10 @@ x-backend: &backend
     target: runtime
   environment:
     MEDIA_DIR: /data/media
+    AUDIT_DIR: /data/audit
     AUTH_SECRET: ${AUTH_SECRET:-}
     AUDIT_SECRET: ${AUDIT_SECRET:-}
+    EVENTS_ENABLED: ${EVENTS_ENABLED:-true}
     ACCESS_TOKEN_MINUTES: ${ACCESS_TOKEN_MINUTES:-30}
     DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-auction}:${POSTGRES_PASSWORD:-auction_dev}@db:5432/${POSTGRES_DB:-auction_house}
     DATABASE_URL_UNPOOLED: postgresql+psycopg://${POSTGRES_USER:-auction}:${POSTGRES_PASSWORD:-auction_dev}@db:5432/${POSTGRES_DB:-auction_house}
@@ -38,6 +40,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - item_media:/data/media
+      - audit_checkpoints:/data/audit:ro
     restart: 'no'
 
   api:
@@ -61,6 +66,21 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+
+  worker:
+    <<: *backend
+    command: ['python', '-m', 'app.worker']
+    volumes:
+      - audit_checkpoints:/data/audit
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ['CMD', 'python', '-m', 'app.worker', '--healthcheck']
+      interval: 10s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
   frontend:

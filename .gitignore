@@ -13,5 +13,7 @@ dist/
 .env.*
 !.env.example
 .tools/
-/docs
 /backend/media/
+
+/backend/audit/
+.vercel

@@ -37,3 +37,7 @@ class LotRead(BaseModel):
     attributes: dict
     leaderPublicId: str | None = None
     version: int = 0
+    closureComplete: bool = False
+    sold: bool = False
+    settledAmount: int | None = None
+    receiptId: str | None = None

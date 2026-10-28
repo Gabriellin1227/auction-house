@@ -7,6 +7,7 @@ import { useAsync } from '../hooks/useAsync'
 import { formatMoney } from '../utils/format'
 import type { Lot, User } from '../types'
 import Dialog from '../components/Dialog'
+import Participations from '../components/Participations'
 
 type Wallet = {
   balance_cents: number
@@ -32,6 +33,13 @@ function SellerPanel() {
   const [revision, setRevision] = useState(0)
   const { data: lots, error } = useAsync(
     () => http.get<Lot[]>('/lots/mine'),
+    [revision],
+  )
+  const { data: summary, error: summaryError } = useAsync(
+    () =>
+      http.get<{ total_lots: number; total_received_cents: number }>(
+        '/auctioneers/me/summary',
+      ),
     [revision],
   )
   const [items, setItems] = useState<Item[]>([])
@@ -92,6 +100,20 @@ function SellerPanel() {
   return (
     <section className="account-section">
       <h2>Meus lotes</h2>
+      {summary && (
+        <p>
+          Total recebido:{' '}
+          <strong>{formatMoney(summary.total_received_cents)}</strong> ·{' '}
+          {summary.total_lots} lotes
+        </p>
+      )}
+      {summaryError && <p role="alert">{summaryError.message}</p>}
+      <button
+        className="btn btn--ghost"
+        onClick={() => setRevision((value) => value + 1)}
+      >
+        Atualizar resultados
+      </button>
       {error && <p role="alert">{error.message}</p>}
       <form className="account-inline" onSubmit={search}>
         <label>
@@ -221,6 +243,20 @@ function SellerPanel() {
               }{' '}
               · {formatMoney(lot.currentBid)}
             </p>
+            {lot.status === 'closed' && (
+              <p>
+                {lot.closureComplete
+                  ? lot.sold
+                    ? `Arrematado por ${formatMoney(lot.settledAmount || 0)}`
+                    : 'Encerrado sem vencedor'
+                  : 'Aguardando liquidação automática'}
+              </p>
+            )}
+            {lot.receiptId && (
+              <Link className="back-link" to={`/receipts/${lot.receiptId}`}>
+                Ver comprovante público
+              </Link>
+            )}
             <div className="account-inline">
               <button
                 disabled={pending || lot.status !== 'scheduled' || lot.bids > 0}
@@ -349,6 +385,12 @@ export default function AccountPage() {
   return (
     <div className="container account-page">
       <h1>Minha conta</h1>
+      <button
+        className="btn btn--ghost"
+        onClick={() => setRevision((value) => value + 1)}
+      >
+        Atualizar carteira e participações
+      </button>
       <p>
         {user.role === 'auctioneer' ? 'Leiloeiro' : 'Licitante'} · {user.name}
       </p>
@@ -434,6 +476,9 @@ export default function AccountPage() {
         </ul>
       </section>
       {user.role === 'auctioneer' && <SellerPanel />}
+      {user.role === 'bidder' && (
+        <Participations key={user.id} revision={revision} />
+      )}
       <section className="account-section">
         <h2>Inativar conta</h2>
         <p>

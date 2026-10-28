@@ -8,7 +8,6 @@ from fastapi import HTTPException
 from sqlalchemy import event, func, select
 from sqlalchemy.orm import Session
 
-from app.auth.security import create_token
 from app.bids.service import BidService
 from app.bids.signing import canonical, record, sign
 from app.db.models import (
@@ -21,54 +20,6 @@ from app.db.models import (
     WalletEntry,
     WalletReservation,
 )
-
-
-@pytest.fixture
-def market(client, database):
-    with Session(database) as session, session.begin():
-        users = [
-            User(
-                id=uuid4(),
-                name=f"Pessoa {i}",
-                email=f"pessoa{i}@example.com",
-                password_hash="unused-in-this-fixture",
-                role="auctioneer" if i == 0 else "bidder",
-            )
-            for i in range(3)
-        ]
-        session.add_all(users)
-        session.flush()
-        session.add_all(
-            [Wallet(user_id=user.id, balance_cents=10000) for user in users]
-        )
-        now = session.scalar(select(func.clock_timestamp()))
-        lots = [
-            Lot(
-                id=uuid4(),
-                seller_id=users[0].id,
-                source_provider="test",
-                external_item_id=str(i),
-                source_url="https://example.com/item",
-                item_title="Obra de teste",
-                item_attributes={"category": "fine-art"},
-                local_image_key="test.jpg",
-                opening_bid_cents=8000,
-                min_increment_cents=1000,
-                starts_at=now - timedelta(hours=1),
-                original_ends_at=now + timedelta(hours=1),
-                ends_at=now + timedelta(hours=1),
-            )
-            for i in range(2)
-        ]
-        session.add_all(lots)
-        session.flush()
-        ids = [u.id for u in users]
-        lot_ids = [lot.id for lot in lots]
-    return {
-        "users": ids,
-        "lots": lot_ids,
-        "headers": [{"Authorization": "Bearer " + create_token(uid)} for uid in ids],
-    }
 
 
 def offer(client, market, amount=8000, bidder=1, lot=0):
@@ -316,7 +267,7 @@ def test_missing_signing_key_cannot_partially_accept(
         assert offer(client, market).status_code == 503
         with Session(database) as session:
             assert session.scalar(select(func.count()).select_from(Bid)) == 0
-            assert session.scalar(select(func.count()).select_from(AuditHead)) == 0
+            assert session.scalar(select(func.count()).select_from(AuditHead)) == 2
             assert sum(session.scalars(select(Wallet.reserved_cents))) == 0
     finally:
         get_settings.cache_clear()

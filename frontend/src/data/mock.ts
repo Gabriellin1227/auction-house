@@ -7,20 +7,36 @@ const now = Date.now()
 const inMs = (h: number, m = 0, s = 0) => now + ((h * 60 + m) * 60 + s) * 1000
 
 export const CATEGORIES: Category[] = [
-  { slug: 'jewelry', name: 'Joias', image: '/images/placeholder.svg' },
-  { slug: 'fine-art', name: 'Belas-artes', image: '/images/placeholder.svg' },
-  { slug: 'horology', name: 'Relojoaria', image: '/images/placeholder.svg' },
-  { slug: 'ceramics', name: 'Cerâmica', image: '/images/placeholder.svg' },
-  { slug: 'furniture', name: 'Mobília', image: '/images/placeholder.svg' },
+  { slug: 'jewelry', name: 'Joias', image: '/images/categories/jewelry.jpg' },
+  {
+    slug: 'fine-art',
+    name: 'Belas-artes',
+    image: '/images/categories/fine-art.jpg',
+  },
+  {
+    slug: 'horology',
+    name: 'Relojoaria',
+    image: '/images/categories/horology.jpg',
+  },
+  {
+    slug: 'ceramics',
+    name: 'Cerâmica',
+    image: '/images/categories/ceramics.jpg',
+  },
+  {
+    slug: 'furniture',
+    name: 'Mobília',
+    image: '/images/categories/furniture.jpg',
+  },
   {
     slug: 'coins-manuscripts',
     name: 'Moedas e manuscritos',
-    image: '/images/placeholder.svg',
+    image: '/images/categories/coins-manuscripts.jpg',
   },
   {
     slug: 'curiosities',
     name: 'Curiosidades',
-    image: '/images/placeholder.svg',
+    image: '/images/categories/curiosities.jpg',
   },
 ]
 

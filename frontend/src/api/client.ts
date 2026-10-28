@@ -1,4 +1,14 @@
-const BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')
+export const API_BASE = (import.meta.env.VITE_API_URL || '/api').replace(
+  /\/$/,
+  '',
+)
+// Persisted images belong to the API, which can run on a separate domain.
+export function mediaUrl(path: string, apiBase = API_BASE): string {
+  return path.startsWith('/api/media/')
+    ? `${apiBase.replace(/\/$/, '')}${path.slice(4)}`
+    : path
+}
+
 let accessToken: string | null = null
 export const setAccessToken = (token: string | null) => {
   accessToken = token
@@ -21,7 +31,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
   let response: Response
   try {
-    response = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+    response = await fetch(`${API_BASE}${path}`, { ...options, headers })
   } catch {
     throw new ApiError(
       'Não foi possível conectar ao servidor. Tente novamente.',

@@ -1,22 +1,24 @@
+import { mediaUrl } from '../api/client'
 import { useState } from 'react'
 import BidPanel, { BidHistory } from '../components/BidPanel'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { fetchLot, USE_MOCK } from '../api/auction'
 import { useAsync } from '../hooks/useAsync'
+import { useLiveLot } from '../hooks/useLiveLot'
 import { useCountdown } from '../hooks/useCountdown'
 import { formatMoney } from '../utils/format'
 import type { Lot } from '../types'
 
 function LotInformation({ lot: initialLot }: { lot: Lot }) {
-  const [lot, setLot] = useState(initialLot)
+  const { lot, accepted, connection } = useLiveLot(initialLot)
   const { label, closed } = useCountdown(lot.endsAt)
   return (
     <>
       <div className="lot-details__grid">
         <figure className="lot-details__gallery">
           <img
-            src={lot.image}
+            src={mediaUrl(lot.image)}
             alt={lot.title}
             onError={(event) => {
               if (!event.currentTarget.src.endsWith('/images/placeholder.svg'))
@@ -54,21 +56,16 @@ function LotInformation({ lot: initialLot }: { lot: Lot }) {
             <span>{closed ? 'Prazo encerrado' : 'Tempo restante'}</span>
             <strong>{label}</strong>
           </div>
-          <BidPanel
-            lot={lot}
-            closed={closed}
-            onAccepted={(bid) =>
-              setLot({
-                ...lot,
-                currentBid: bid.amount_cents,
-                bids: bid.sequence,
-                endsAt: new Date(bid.ends_at).getTime(),
-                status: 'live',
-                leaderPublicId: bid.bidder_public_id,
-                version: bid.version,
-              })
-            }
-          />
+          {!USE_MOCK && (
+            <p role="status" className="lot-details__notice">
+              {connection === 'live'
+                ? 'Sala conectada · atualizações automáticas'
+                : connection === 'offline'
+                  ? 'Sala indisponível. Atualize o lote para conferir.'
+                  : 'Reconectando à sala… Você pode atualizar o lote manualmente.'}
+            </p>
+          )}
+          <BidPanel lot={lot} closed={closed} onAccepted={accepted} />
         </section>
       </div>
       <div className="lot-details__information">
@@ -125,6 +122,11 @@ function LotInformation({ lot: initialLot }: { lot: Lot }) {
           <span className="eyebrow">A disputa</span>
           <h2 id="bid-history">Histórico de lances</h2>
           <BidHistory lot={lot} />
+          {!USE_MOCK && (
+            <Link className="back-link" to={`/lots/${lot.id}/audit`}>
+              Auditar histórico público
+            </Link>
+          )}
         </section>
       </div>
     </>

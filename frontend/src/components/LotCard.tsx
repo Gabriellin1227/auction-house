@@ -1,3 +1,4 @@
+import { mediaUrl } from '../api/client'
 import { Link, useLocation } from 'react-router-dom'
 import { useCountdown } from '../hooks/useCountdown'
 import { formatMoney } from '../utils/format'
@@ -20,7 +21,7 @@ export default function LotCard({ lot }: LotCardProps) {
       <div className="lot__media">
         <span className="lot__timer">{label}</span>
         <img
-          src={lot.image}
+          src={mediaUrl(lot.image)}
           alt={lot.title}
           loading="lazy"
           onError={(e) => {

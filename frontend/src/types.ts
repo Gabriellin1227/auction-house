@@ -11,6 +11,10 @@ export interface Lot {
   id: string | number
   leaderPublicId?: string | null
   version?: number
+  closureComplete?: boolean
+  sold?: boolean
+  settledAmount?: number | null
+  receiptId?: string | null
   status?: string
   startsAt?: number
   increment?: number

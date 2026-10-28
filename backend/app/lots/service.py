@@ -4,9 +4,10 @@ from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.bids.signing import ZERO_HASH, head_record, sign
 from app.catalog.service import CATEGORIES, CatalogService
 from app.config import get_settings
-from app.db.models import Bid, Lot, User
+from app.db.models import AuditHead, Bid, Lot, Receipt, Settlement, User
 from app.lots.schemas import LotCreate, LotRead, LotUpdate
 
 
@@ -39,6 +40,16 @@ class LotService:
             select(func.count()).select_from(Bid).where(Bid.lot_id == lot.id)
         )
         bid = self.session.get(Bid, lot.current_bid_id) if lot.current_bid_id else None
+        settlement = self.session.scalar(
+            select(Settlement).where(Settlement.lot_id == lot.id)
+        )
+        receipt_id = (
+            self.session.scalar(
+                select(Receipt.id).where(Receipt.settlement_id == settlement.id)
+            )
+            if settlement
+            else None
+        )
         category = self.category(lot.item_attributes.get("category", "fine-art"))
         now = self.now()
         status = lot.status
@@ -69,6 +80,10 @@ class LotService:
             if bid
             else None,
             version=lot.version,
+            closureComplete=lot.status == "closed",
+            sold=settlement is not None,
+            settledAmount=settlement.amount_cents if settlement else None,
+            receiptId=str(receipt_id) if receipt_id else None,
         )
 
     def create(self, owner: UUID, data: LotCreate):
@@ -101,6 +116,16 @@ class LotService:
                 ends_at=data.ends_at,
             )
             self.session.add(lot)
+            self.session.flush()
+            self.session.add(
+                AuditHead(
+                    lot_id=lot.id,
+                    last_sequence=0,
+                    last_hash=ZERO_HASH,
+                    key_version=1,
+                    signature=sign(head_record(lot.id, 0, ZERO_HASH)),
+                )
+            )
             self.session.commit()
         except Exception:
             self.session.rollback()

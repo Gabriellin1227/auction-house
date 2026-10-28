@@ -8,6 +8,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
+from app.audit.service import AuditService
 from app.bids.schemas import BidAccepted, BidRead
 from app.bids.signing import (
     KEY_VERSION,
@@ -129,18 +130,7 @@ class BidService:
 
         head = self.session.get(AuditHead, lot_id)
         if head is None:
-            if self.session.scalar(
-                select(func.count()).select_from(Bid).where(Bid.lot_id == lot_id)
-            ):
-                raise HTTPException(409, "Histórico de lances inconsistente")
-            head = AuditHead(
-                lot_id=lot_id,
-                last_sequence=0,
-                last_hash=ZERO_HASH,
-                key_version=KEY_VERSION,
-                signature=sign(head_record(lot_id, 0, ZERO_HASH)),
-            )
-            self.session.add(head)
+            raise HTTPException(409, "Cabeçalho de auditoria ausente")
         expected_sequence = previous.sequence if previous else 0
         expected_hash = previous.record_hash if previous else ZERO_HASH
         if (
@@ -153,6 +143,10 @@ class BidService:
             )
         ):
             raise HTTPException(409, "Histórico de lances inconsistente")
+
+        verification = AuditService(self.session).verify(lot_id)
+        if verification["integrity"] != "valid":
+            raise HTTPException(409, "Auditoria inconsistente; lance bloqueado")
 
         if previous:
             reservation = self.session.scalar(

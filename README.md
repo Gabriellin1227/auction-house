@@ -1,109 +1,234 @@
-# Auction House
+# Yorknew — Auction House
 
-A documentação de acompanhamento fica localmente em `docs/STATUS_PROJETO.md` e `docs/VERSAO_V1.md` (a pasta `docs/` está ignorada pelo Git). O documento do marco histórico também pode ser consultado com `git show v1:VERSAO_V1.md`.
+Casa de leilões desenvolvida para o teste técnico Elite Dev da Verzel. Leiloeiros importam obras de uma API pública e publicam lotes; licitantes depositam saldo fictício, disputam por lances e recebem comprovantes públicos. O histórico possui auditoria pública com hashes, HMAC e checkpoints externos ao banco.
 
-Casa de leilões — teste técnico Verzel. Base com PostgreSQL, modelos SQLAlchemy, migrations Alembic, Docker Compose e automações de qualidade para React/TypeScript e FastAPI/Python. CRUDs de contas e lotes, catálogo público e depósitos simulados estão implementados. Lances transacionais com reserva/liberação de saldo, prorrogação e gravação da outbox estão implementados. Publicação em tempo real, liquidação e auditoria pública permanecem nas próximas entregas.
+Repositório: [Gabriellin1227/auction-house](https://github.com/Gabriellin1227/auction-house). **Deploy público: pendente.** Este README descreve a aplicação local; a entrega do desafio ainda depende do deploy e das pendências ao final.
 
-## Frontend Yorknew
+## Tecnologias e estrutura
 
-O visual de `yorknew-auction.zip` foi integrado em `frontend/src` com Vite, mantendo React/TypeScript e as automações da raiz. Há um único package-lock.json para JavaScript e uv.lock separado para Python.
+React/TypeScript e Vite; FastAPI/Python 3.12; PostgreSQL 17; SQLAlchemy e Alembic. Monólito modular com serviços por composição (POO), transações financeiras e eventos persistidos em outbox. Worker Python separado para fechamento e checkpoints. Atualizações da sala por WebSocket.
 
-```sh
-npm ci
-npm run dev
-```
+- `frontend/src`: páginas, componentes, API client e hooks.
+- `frontend/public`: imagens locais e créditos.
+- `backend/app`: auth, users, catalog, lots, bids, wallets, settlements, audit e events.
+- `backend/migrations`: migration inicial das dez tabelas.
+- `backend/tests` e `frontend/test`: testes automatizados.
+- `docs/`: guias das entregas e matriz do PDF. A pasta continua ignorada pelo Git por configuração do projeto; este README contém as instruções essenciais para executar um clone.
+- Um `package-lock.json` na raiz para JavaScript; `backend/uv.lock` para Python.
 
-Abra http://localhost:5173. Para login/cadastro reais, mantenha FastAPI em localhost:8000; o Vite encaminha `/api` ao backend removendo esse prefixo. Use as contas demo abaixo ou cadastre uma conta. O token fica apenas na memória: atualizar a página exige novo login.
+## Iniciar com Docker
 
-O catálogo usa o PostgreSQL por padrão (`VITE_USE_MOCK=false`). Leiloeiros importam itens CC0 do acervo público Cleveland pela página Minha conta; título, atributos e imagem são persistidos. A vitrine não depende da API externa para exibir os lotes já publicados. `VITE_USE_MOCK=true` habilita explicitamente a prévia visual de desenvolvimento.
-
-Minha conta também oferece edição de perfil, consulta de carteira/extrato e depósito simulado idempotente para licitantes. O painel do leiloeiro cria, edita lotes agendados sem lances e cancela lotes sem lances. A página do lote permite enviar lances em centavos, acompanhar liderança e consultar histórico público paginado. Use **Atualizar lote** para consultar a disputa entre clientes; WebSocket, worker, liquidação e auditoria pública ainda estão nas próximas entregas.
-
-Configuração opcional em frontend/.env (base em frontend/.env.example): VITE_API_URL=/api e VITE_USE_MOCK=false. Não há fallback silencioso para dados fictícios quando a API real falha.
-
-Build: `npm run build`; preview do build: `npm run preview` (a prévia estática não inclui o proxy de desenvolvimento). O CI verifica também o build. No Docker, `npm run docker:up` sobe API, banco e frontend; abra http://localhost:5174. O Nginx encaminha `/api` à API no ambiente Docker.
-
-## Banco e API com Docker
+Requisitos: Git, Docker Engine com Compose e Node 24/npm para os scripts. Os builds de frontend e backend acontecem nos containers; não é necessário instalar Python no host para esse caminho.
 
 ```sh
+git clone https://github.com/Gabriellin1227/auction-house.git
+cd auction-house
 npm run setup:env
 npm run docker:up
 npm run docker:seed
 ```
 
-Requer Docker e Compose. PostgreSQL aguarda ficar saudável, Alembic aplica migrations e FastAPI sobe em http://localhost:8000/docs. Dados persistem em volumes nomeados. Para parar preservando dados: `npm run docker:down`.
+`setup:env` cria `.env` com chaves privadas aleatórias quando ausentes e preserva chaves existentes. Não inclua `.env` no Git. `docker:up` aguarda PostgreSQL, aplica migrations e sobe API, worker e frontend.
 
-Detalhes de banco, migrations, volumes, testes e preparação do Neon: [guia da entrega 1](docs/banco-e-docker.md). Decisões e próximas etapas: [roteiro](docs/roteiro.md).
+| Acesso                           | Endereço local              |
+| -------------------------------- | --------------------------- |
+| Site                             | http://localhost:5174       |
+| Swagger / API                    | http://localhost:8000/docs  |
+| Saúde / disponibilidade do banco | `/health` e `/ready` na API |
+| Banco para ferramentas do host   | `localhost:5433`            |
 
-Para testar as restrições em PostgreSQL real: `npm run db:test`. O CI também executa esses testes. Sem `TEST_DATABASE_URL`, os testes de integração são marcados como skipped no fluxo local.
+```sh
+docker compose ps
+docker compose logs worker
+npm run docker:down
+```
 
-## CRUD e login para testar
+`docker:down` preserva volumes. `docker compose down -v` remove os dados; não use como reinício comum.
 
-A API já permite cadastro com carteira, login, consulta/edição do perfil e inativação da própria conta. Há também consulta da carteira e resumo restrito ao leiloeiro. Guia com rotas, exemplos e passo a passo no Swagger: [CRUD inicial](docs/crud-inicial.md).
+### Contas de demonstração
 
-Após rodar `npm run docker:seed`, use no **Authorize** de http://localhost:8000/docs:
+| Papel     | E-mail                  |
+| --------- | ----------------------- |
+| Leiloeiro | `leiloeiro@example.com` |
+| Licitante | `cliente1@example.com`  |
+| Licitante | `cliente2@example.com`  |
 
-- `leiloeiro@example.com` (auctioneer)
-- `cliente1@example.com` e `cliente2@example.com` (bidder)
-- Senha pública de demonstração para os três: `DemoAuction2026!`
+Senha pública de demo: `DemoAuction2026!`. Seed idempotente: não redefine senha, ativo ou saldo de contas existentes. Use essas contas somente no ambiente de demonstração.
 
-Seed não altera contas existentes nem cria lote fictício. O lote de demonstração pode ser importado pelo painel do leiloeiro, a partir da API pública. Tokens expiram em 30 minutos e exigem AUTH_SECRET privada; `setup:env` gera a chave localmente.
+O seed também importa uma obra real do Cleveland, com imagem persistida, abertura de R$ 10, incremento de R$ 1 e duração de 24 horas. Reutiliza um lote demo aberto com mais de cinco minutos restantes e auditoria válida, sem alterar lances ou prazos existentes. Na primeira importação, precisa acessar o museu; se a origem falhar, preserva as contas e termina com erro, sem criar um lote fictício. Execute novamente após a recuperação. O serviço de seed no Docker compartilha o volume de imagens com a API.
 
-## Preparação
+## Roteiro de uso
 
-Requisitos: Node 24 (`nvm use`), Python 3.12 e uv 0.13.6 no PATH.
-Para instalar uv: `python3 -m pip install --user uv==0.13.6` (ou use o instalador oficial em https://docs.astral.sh/uv/getting-started/installation/).
+1. Entre como leiloeiro e abra Minha conta. Busque uma obra no acervo público, selecione e defina categoria, valores, início e fim. Para disputar agora, início deve estar no passado e fim no futuro.
+2. Abra dois navegadores/perfis e entre com os dois licitantes. Cada um deposita saldo simulado em Minha conta.
+3. Abra o lote. O primeiro lance deve atingir o valor inicial; os próximos devem atingir o atual mais o incremento. A sala atualiza preço, histórico, prazo e liderança automaticamente.
+4. Confira a carteira: o líder tem saldo reservado. Quando é superado, sua reserva do lote é liberada na mesma transação do novo lance.
+5. Ao vencer o prazo, o worker encerra mesmo sem navegador. Com vencedor, captura a reserva, debita comprador e credita leiloeiro. Sem lances, encerra sem cobrança ou comprovante de arremate.
+6. Em Minha conta, licitante consulta participações/arremates e abre o comprovante público. Vendedor consulta resultados por lote e total recebido. Use os botões de atualização da conta para recarregar esses resultados.
+7. Compartilhe `/receipts/{uuid}`; funciona sem login e sem expor nome/e-mail/saldo. O lote e o comprovante têm link para `/lots/{uuid}/audit`.
+8. Na auditoria, confira cadeia, cabeçalho e checkpoint. **Cadeia válida com checkpoint pendente não significa histórico integralmente ancorado.** A verificação pode ser refeita pelo botão da página.
 
-Na raiz:
+A barra superior contém somente as sete categorias principais. Para voltar à vitrine sem filtro, clique no logotipo. As imagens de categorias ficam no frontend e têm créditos em `frontend/public/images/categories/credits.json`.
+
+## Regras importantes
+
+- Conta tem um papel; leiloeiro não dá lance. Propriedade, papel e ativo são conferidos no backend.
+- Valores em centavos inteiros, BRL. Datas em UTC; o relógio do PostgreSQL decide `início <= agora < fim`.
+- Líder não cobre o próprio lance. Disponível = total − reservado, considerando os outros lotes.
+- Aceite bloqueia lote e carteiras, em ordem consistente. Lance, reserva/liberação, extrato, prazo, assinatura e outbox confirmam juntos.
+- Lance nos últimos 120 segundos redefine o fim para **horário do aceite + 120 segundos**, preservando o prazo original. Essa é a interpretação adotada para a prorrogação do PDF.
+- Lote pode ser editado somente antes do início e sem lances; item importado é imutável. Cancelamento lógico somente sem lances e antes do fechamento.
+- Depósito tem `Idempotency-Key` UUID: repetir pedido igual não duplica crédito; mesma chave com valor diferente gera conflito.
+- Lance não tem chave de idempotência. Se perder a resposta, consulte lote, histórico e carteira antes de reenviar. Só deadlock/serialização com transação abortada têm retentativas automáticas, até três tentativas.
+- Liquidação tem unicidade por lote e chaves únicas de débito/crédito. Reexecução não duplica pagamento.
+- Inativação preserva histórico; compromissos aceitos continuam sujeitos à liquidação.
+- Saldos e comprovantes são de demonstração; não há pagamento real nem nota fiscal.
+
+## API pública e privada
+
+| Método / rota                                                  | Finalidade / acesso                                    |
+| -------------------------------------------------------------- | ------------------------------------------------------ |
+| `POST /users`, `POST /auth/token`                              | Cadastro e login                                       |
+| `GET/PATCH/DELETE /users/me`                                   | Perfil da própria conta; DELETE inativa                |
+| `GET /categories`, `GET /lots`, `GET /lots/{id}`, `GET /stats` | Catálogo público                                       |
+| `GET /catalog/items?q=...`                                     | Busca externa, leiloeiro                               |
+| `POST /lots`, `GET /lots/mine`, `PATCH/DELETE /lots/{id}`      | Gestão de lotes com papel/propriedade                  |
+| `GET /wallets/me`, `GET /wallets/me/entries`                   | Carteira e extrato privados                            |
+| `POST /wallets/me/deposits`                                    | Depósito simulado, licitante; Idempotency-Key          |
+| `POST /lots/{id}/bids`                                         | Lance autenticado, `{ "amount_cents": 8000 }`          |
+| `GET /lots/{id}/bids?after=0`                                  | Histórico público; até 100, cursor por sequência       |
+| `WS /ws/lots/{id}`                                             | Avisos públicos da sala; frontend acessa `/api/ws/...` |
+| `GET /bidders/me/participations?offset=0`                      | Participações próprias, até 100                        |
+| `GET /auctioneers/me/summary`                                  | Resultado agregado do próprio vendedor                 |
+| `GET /receipts/{id}`                                           | Snapshot público do comprovante                        |
+| `GET /lots/{id}/audit?after=0`                                 | Auditoria pública completa; pagina só a exibição       |
+
+Swagger contém schemas e contratos. O token fica em memória: atualizar a página exige novo login. Não há CRUD livre de lance, movimentação, liquidação ou comprovante.
+
+## Persistência e independência da API externa
+
+A importação usa o [acervo aberto do Cleveland Museum](https://www.clevelandart.org/open-access-api), selecionando itens CC0. O backend consulta o item por ID, valida a origem da imagem e persiste título, atributos e JPEG antes de publicar. Vitrine, sala, auditoria e comprovante não precisam consultar o museu para ler itens já publicados. Falha externa pode impedir novas buscas/importações.
+
+| Volume              | Responsabilidade                                                          |
+| ------------------- | ------------------------------------------------------------------------- |
+| `pg_data`           | PostgreSQL                                                                |
+| `item_media`        | Imagens importadas, servidas pela API                                     |
+| `audit_checkpoints` | Journal separado do banco; worker escreve, API lê em modo somente leitura |
+
+Volume não é backup. Preserve dump, imagens, journal e chaves privadas em cópias coordenadas. Backups/restauração de produção ainda não foram automatizados.
+
+## Auditoria e limites de ameaça
+
+Cada lance tem SHA-256 de JSON canônico com hash anterior e HMAC-SHA256 autenticado com `AUDIT_SECRET`. Cabeçalho assinado autentica quantidade e hash final, inclusive histórico vazio. A verificação pública examina sequência, dados, assinaturas, cabeçalho e liderança.
+
+O worker grava checkpoints encadeados/autenticados em JSONL fora do PostgreSQL, com locks e fsync. A auditoria compara o journal preservado com o banco para detectar rollback de histórico/cabeçalho antigos. A página distingue resultado válido, inconsistente, indisponível e checkpoint pendente.
+
+Limites: checkpoint é assíncrono; trecho ainda pendente não tem garantia contra rollback. Apagar todo o journal aparece como pendente, não como ancorado. Quem controla banco e journal pode truncar/restaurar ambos; quem obtém a chave pode forjar assinaturas. HMAC não é assinatura digital com chave pública e a API de verificação precisa ser confiável. O mecanismo cobre lances, não autentica todo campo do banco nem assina o comprovante nesta versão. Chave versão 1; rotação ainda não implementada.
+
+### Dados legados e comandos de auditoria
+
+Novos lotes já têm cabeçalho inicial. Para lotes anteriores realmente vazios, é possível criar explicitamente os cabeçalhos ausentes:
+
+```sh
+docker compose exec worker python -m app.audit.checkpoints --init-empty-heads
+docker compose exec worker python -m app.audit.checkpoints
+```
+
+O bootstrap não reassina lances existentes. Não o use para esconder uma falha: histórico com lances e cabeçalho perdido requer investigação/backup confiável.
+
+Fora do Docker: `npm run audit:init-empty` e `npm run audit:checkpoint`. O journal do host usa `backend/audit/`; não é automaticamente o journal do volume Docker. A implementação usa filesystem POSIX; prefira Linux/Docker ou WSL.
+
+## Desenvolvimento sem containers para API/frontend
+
+Requisitos: Node 24 (`nvm use`), Python 3.12, uv 0.13.6 e PostgreSQL. Você pode usar o serviço db do Compose.
+
+```sh
+npm ci
+npm run setup:env
+npm run setup:backend
+npm run db:up
+npm run db:migrate
+npm run db:seed
+```
+
+Em terminais separados:
+
+```sh
+node scripts/uv.mjs run --directory backend --locked uvicorn app.main:app --reload
+npm run worker
+npm run dev
+```
+
+Site em http://localhost:5173. Vite encaminha `/api` para a API em localhost:8000, incluindo WebSocket. `npm run worker:once` executa um ciclo. `npm run build` gera o frontend; `npm run preview` é prévia estática, sem proxy da API.
+
+`VITE_USE_MOCK=false` é o padrão. `true` é só prévia visual, explicitamente identificada e sem lances reais. Não existe fallback silencioso para dados fictícios.
+
+### Variáveis principais
+
+Veja `.env.example`. Não publique segredos.
+
+| Variável                         | Uso                                                             |
+| -------------------------------- | --------------------------------------------------------------- |
+| `DATABASE_URL`                   | Runtime PostgreSQL                                              |
+| `DATABASE_URL_UNPOOLED`          | Conexão direta para migrations, útil no Neon                    |
+| `AUTH_SECRET`                    | Assinatura JWT                                                  |
+| `AUDIT_SECRET`                   | HMAC de lances, cabeçalhos e checkpoints; preservar com backups |
+| `ACCESS_TOKEN_MINUTES`           | Expiração JWT, padrão 30                                        |
+| `EVENTS_ENABLED`                 | Publicador da outbox, padrão true                               |
+| `AUDIT_DIR` / `MEDIA_DIR`        | Diretórios de journal e imagens                                 |
+| `VITE_API_URL` / `VITE_USE_MOCK` | Base da API / prévia visual                                     |
+
+O Compose configura URLs internas usando hostname `db`. No host, a porta padrão é 5433. No Neon, preserve TLS (`sslmode=require`) e use conexão direta para migrations. Neon/Vercel ainda não representam um deploy concluído desta aplicação.
+
+## Testes e automações
 
 ```sh
 npm ci
 npm run setup:backend
-npm run check
+npm run db:up
+TEST_DATABASE_URL=postgresql://auction:auction_dev@localhost:5433/auction_house npm run check
+npm run build
 ```
 
-`npm ci` ativa os hooks do Husky automaticamente. Nesta máquina há também uma cópia de uv em `.tools/bin/uv`, ignorada pelo Git; o runner usa essa cópia quando disponível.
+A URL acima é exclusiva de desenvolvimento local. Testes PostgreSQL usam schemas temporários e os removem ao final; não adulteram o schema demo. Sem `TEST_DATABASE_URL`, testes de integração são pulados e não validam locks. Para o ambiente de teste Docker: `npm run db:test`.
 
-## Commits e validações
+Validação local mais recente: **118 testes backend e 22 frontend aprovados**, além de lint, formatação, tipagem e build.
 
-- `pre-commit`: lint-staged executa ESLint/Prettier nos arquivos JS/TS e Ruff nos arquivos Python staged. Correções são incluídas no commit.
-- `commit-msg`: commitlint exige Conventional Commits, por exemplo `feat: adiciona carteira`, `fix: corrige reserva de saldo` ou `chore: configura ferramentas`.
-- `pre-push`: executa `npm run check`, com formatação, lint, tipagem e testes de ambas as partes.
-- GitHub Actions: valida frontend e backend em pushes e pull requests; em pull requests também valida as mensagens dos commits da contribuição.
+Cobertura inclui autenticação/papéis, CRUDs, snapshot offline, depósito idempotente, reserva/liberação, concorrência, prorrogação, rollback, liquidação repetida, dois workers, reconexão, privacidade, adulteração de lances, remoção de cauda/meio e rollback com checkpoint preservado.
 
-Os hooks validam commits feitos por você; eles não criam commits nem fazem push automaticamente. O CI repete as verificações mesmo se um hook local for desativado. Para exigir CI antes do merge, habilite proteção da branch no GitHub.
+Husky/lint-staged: formatação/lint no pre-commit, Conventional Commits no commit-msg e `npm run check` no pre-push. CI repete frontend/backend/build e valida mensagens em PRs. Nenhum hook cria commits automaticamente.
 
-## Comandos
+## Publicação preparada: Vercel, Neon e Render
 
-| Comando                                                                                     | Objetivo                           |
-| ------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `npm run format`                                                                            | Formatar arquivos com Prettier     |
-| `npm run lint`                                                                              | ESLint sem warnings                |
-| `npm run typecheck`                                                                         | Validar TypeScript                 |
-| `npm test`                                                                                  | Testes frontend com Vitest         |
-| `npm run test:watch`                                                                        | Testes frontend em modo interativo |
-| `npm run check:frontend`                                                                    | Todas as verificações frontend     |
-| `npm run check:backend`                                                                     | Ruff e pytest                      |
-| `npm run check`                                                                             | Todas as verificações              |
-| `node scripts/uv.mjs run --project backend ruff format backend`                             | Formatar Python                    |
-| `node scripts/uv.mjs run --project backend uvicorn app.main:app --app-dir backend --reload` | Iniciar API                        |
+A configuração está no código; **a aplicação ainda não foi publicada**.
 
-A API expõe `GET /health` e `GET /ready` (conexão PostgreSQL). A suíte atual tem 70 testes backend (com PostgreSQL real para integração) e dez frontend. Inclui autenticação, CRUDs, depósitos, privacidade, reservas/liberações, recusas de lance, prorrogação, rollback e concorrência no mesmo lote ou na mesma carteira.
+- Vercel: raiz do repositório, Node 24, `npm ci`, `npm run build`, saída `frontend/dist`. `vercel.json` configura o fallback das páginas React.
+- Frontend: `VITE_USE_MOCK=false` e `VITE_API_URL=https://SEU-SERVICO.onrender.com`, sem `/api`. Reconstruir o frontend ao alterar essas variáveis.
+- Neon: `DATABASE_URL` com TLS e `DATABASE_URL_UNPOOLED` com a conexão direta para migrations; preservar os parâmetros fornecidos pelo painel.
+- Render: `render.yaml` usa plano pago `starter` e disco persistente de 1 GB em `/data`. Confirmar custo antes de provisionar. O Dockerfile é `backend/Dockerfile.render`, com contexto `backend/`.
+- Backend: `CORS_ORIGINS=["https://SEU-PROJETO.vercel.app"]`, chaves independentes `AUTH_SECRET`/`AUDIT_SECRET`, `MEDIA_DIR=/data/media`, `AUDIT_DIR=/data/audit`, `WORKER_REQUIRED=true`, `EVENTS_ENABLED=true`.
 
-As dependências estão fixadas em `package-lock.json` e `backend/uv.lock`. Para adicionar pacotes Python, use `node scripts/uv.mjs add --project backend nome-do-pacote` e inclua o lock atualizado no commit.
+O comando `python -m app.deploy` aplica migrations antes de iniciar API e worker juntos. Se um processo terminar, o supervisor encerra o serviço; `/ready` confere banco e heartbeat do worker. Um serviço único permite que ambos acessem o disco Render. Deploys com esse disco têm pausa; não escalar para múltiplas instâncias.
 
-## Lances transacionais (entrega 4)
+Após publicar, executar `python -m app.seed --demo` no **Shell do serviço Render em execução**, com acesso ao disco. Executar seed local contra o Neon não transfere as imagens para o Render. Conferir lote aberto, imagens, login/depósitos, disputa em duas sessões, WebSocket, liquidação, comprovante e auditoria pelo domínio público.
 
-Execute `npm run setup:env` antes de subir a API: além de `AUTH_SECRET`, agora existe `AUDIT_SECRET`, uma chave privada separada para assinar os lances. O comando preserva chaves existentes. Faça backup privado e não substitua a chave de auditoria após ter registros assinados; rotação com múltiplas versões ainda será implementada.
+Para banco remoto novo, o Blueprint pode gerar chaves novas. Ao transferir histórico existente, preservar a chave de auditoria correspondente, o journal e as imagens. Não publicar credenciais de banco/chaves no frontend ou Git.
 
-Um licitante autenticado envia `POST /lots/{id}/bids` com `{ "amount_cents": 8000 }` para oferecer R$ 80,00. O primeiro lance precisa atingir o inicial; os próximos, o atual mais o incremento. O líder não cobre o próprio lance. Período válido: início inclusivo, fim exclusivo, usando relógio do banco após adquirir os locks.
+## Estado da entrega e pendências
 
-O serviço bloqueia lote e carteiras (em ordem de ID), valida saldo disponível e confirma lance, reserva, liberação anterior, extrato, cabeçalho assinado e outbox na mesma transação. O saldo total permanece igual durante a disputa. Lance nos últimos 120 segundos redefine o fim para horário do aceite + 120 segundos, preservando o prazo original.
+Implementados localmente: contas, catálogo persistido, lotes, carteira, lances, eventos/WebSocket, worker, liquidação, comprovantes, participações/resultados e auditoria com checkpoints.
 
-`GET /lots/{id}/bids?after=0` é público: retorna até 100 lances em ordem crescente; use a última sequência em `after` para continuar. Só expõe identificador público aleatório, valor, sequência, horário e ID do lance. `GET /lots/{id}` inclui `leaderPublicId` e `version`.
+Ainda faltam:
 
-Para testar, deposite saldo fictício com os dois clientes e dispute um lote com início passado e fim futuro. Confira as reservas/liberações na carteira. O frontend mostra recusas e liderança; clique em **Atualizar lote** para consultar alterações de outros clientes. A contagem no navegador é indicativa; o banco decide o prazo.
+- Deploy público e validação dos fluxos na URL de entrega.
+- Provisionar e validar Render com API/worker e disco persistente; `render.yaml` e `backend/Dockerfile.render` estão preparados. A topologia atual suporta **uma instância/processo da API**; não aumentar workers/réplicas sem barramento compartilhado.
+- Revisão humana final e conferência completa do PDF no ambiente público.
+- Backups operacionais e teste de recuperação, rotação de chaves e revisão ampla de acessibilidade.
 
-Limites desta etapa: eventos permanecem pendentes na outbox; ainda não há WebSocket, liquidação ou comprovante. Depois do prazo, a reserva do vencedor continua comprometida até implementarmos o worker. Hashes/HMAC já são reais, mas ainda faltam verificação pública completa e checkpoints externos. Não há idempotência no endpoint de lance: se a resposta se perder, consulte histórico e carteira antes de reenviar; somente transações comprovadamente abortadas por deadlock/serialização são repetidas automaticamente, até três tentativas.
+Cancelamento com estorno após lances e tema claro são opcionais e não foram implementados. Recuperação de senha, nota fiscal, revenda e aplicativo nativo ficam fora do escopo indicado no desafio.
 
-Guia local explicado passo a passo: `docs/LANCES_TRANSACIONAIS.md` (pasta ignorada pelo Git). A documentação essencial para clonar e executar permanece neste README.
+## Uso de IA e revisão
+
+IA foi utilizada para apoiar a estruturação do projeto, implementação de backend/frontend, testes e documentação, a partir das decisões e solicitações do desenvolvedor. As validações automatizadas executadas estão registradas nos guias de cada entrega. A revisão humana final e a validação do deploy ainda precisam ser concluídas pelo responsável antes do envio; este texto não declara que essas etapas já ocorreram.
+
+Documentação local complementar: `docs/ENTREGAS.md`, `docs/MATRIZ_REQUISITOS_PDF.md` e `docs/AUDITORIA_PUBLICA_CHECKPOINTS.md`.

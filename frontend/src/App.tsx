@@ -17,6 +17,8 @@ import AuthForm from './components/AuthForm'
 import CataloguePage from './pages/CataloguePage'
 import LotDetailsPage from './pages/LotDetailsPage'
 import AccountPage from './pages/AccountPage'
+import ReceiptPage from './pages/ReceiptPage'
+import AuditPage from './pages/AuditPage'
 import type { User } from './types'
 
 export interface CatalogueNavigation {
@@ -33,9 +35,7 @@ function Layout() {
   const category = params.get('category') || ''
   const query = params.get('q') || ''
   const [user, setUser] = useState<User | null>(null)
-  const [dialog, setDialog] = useState<'login' | 'register' | 'help' | null>(
-    null,
-  )
+  const [dialog, setDialog] = useState<'login' | 'register' | null>(null)
 
   const catalogue = (key: string, value: string) => {
     const search = new URLSearchParams()
@@ -65,11 +65,7 @@ function Layout() {
             setUser(null)
           }}
         />
-        <CategoryNav
-          active={category}
-          onSelect={selectCategory}
-          onHowItWorks={() => setDialog('help')}
-        />
+        <CategoryNav active={category} onSelect={selectCategory} />
       </div>
       <main id="page-content" tabIndex={-1}>
         {USE_MOCK && (
@@ -102,18 +98,6 @@ function Layout() {
           />
         </Dialog>
       )}
-      {dialog === 'help' && (
-        <Dialog title="Como funciona" onClose={() => setDialog(null)}>
-          <p>
-            Crie uma conta de licitante para participar, ou uma conta de
-            leiloeiro para gerenciar seus lotes. Deposite saldo simulado em
-            Minha conta e ofereça lances na página de um lote aberto. O saldo do
-            líder fica reservado e é liberado quando ele é superado. Atualize o
-            lote para acompanhar a disputa; atualização em tempo real e
-            liquidação automática serão as próximas entregas.
-          </p>
-        </Dialog>
-      )}
       <footer className="footer">
         <div className="container">© The Yorknew Leilão Online.</div>
       </footer>
@@ -128,7 +112,9 @@ export default function App() {
         <Route element={<Layout />}>
           <Route index element={<CataloguePage />} />
           <Route path="lots/:lotId" element={<LotDetailsPage />} />
+          <Route path="lots/:lotId/audit" element={<AuditPage />} />
           <Route path="account" element={<AccountPage />} />
+          <Route path="receipts/:receiptId" element={<ReceiptPage />} />
           <Route
             path="*"
             element={

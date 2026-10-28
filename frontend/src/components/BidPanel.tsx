@@ -70,8 +70,10 @@ export default function BidPanel({
   const submitting = useRef(false)
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
+  const wasLeading = useRef<string | null>(null)
   const minimum = lot.currentBid + (lot.bids > 0 ? lot.increment || 0 : 0)
   const leading = !!user && lot.leaderPublicId === user.public_id
+  if (leading) wasLeading.current = user.public_id
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (submitting.current) return
@@ -117,15 +119,32 @@ export default function BidPanel({
     <section aria-label="Oferecer lance">
       <p className="lot-details__notice">
         {leading
-          ? 'Você está ganhando este lote.'
-          : lot.leaderPublicId && user?.role === 'bidder'
-            ? 'Outro licitante está na liderança.'
-            : 'O valor do líder fica reservado na carteira.'}
+          ? lot.closureComplete && lot.sold
+            ? 'Você arrematou este lote.'
+            : closed
+              ? 'Você liderou o lote. Consulte o resultado do fechamento abaixo.'
+              : 'Você está ganhando este lote.'
+          : wasLeading.current === user?.public_id && user?.role === 'bidder'
+            ? 'Você foi superado. Sua reserva deste lote foi liberada.'
+            : lot.leaderPublicId && user?.role === 'bidder'
+              ? 'Outro licitante está na liderança.'
+              : 'O valor do líder fica reservado na carteira.'}
       </p>
       {closed || lot.status === 'closed' || lot.status === 'cancelled' ? (
         <p>
-          O prazo de lances foi encerrado. A liquidação automática será
-          disponibilizada em uma próxima etapa.
+          {lot.closureComplete
+            ? lot.sold
+              ? 'Leilão encerrado e liquidado.'
+              : 'Leilão encerrado sem vencedor.'
+            : 'Prazo encerrado. Aguardando o fechamento automático.'}
+          {lot.receiptId && (
+            <>
+              {' '}
+              <Link className="back-link" to={`/receipts/${lot.receiptId}`}>
+                Ver comprovante público
+              </Link>
+            </>
+          )}
         </p>
       ) : lot.status === 'scheduled' ? (
         <p>
@@ -167,8 +186,8 @@ export default function BidPanel({
         </Link>
       )}
       <p className="lot-details__notice">
-        Nesta etapa, clique em Atualizar lote para consultar a disputa.
-        Atualização em tempo real será a próxima entrega.
+        A sala recebe atualizações automáticas. Use Atualizar lote se precisar
+        conferir a disputa durante uma falha de conexão.
       </p>
     </section>
   )

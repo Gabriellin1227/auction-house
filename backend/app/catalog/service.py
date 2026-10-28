@@ -10,7 +10,7 @@ from app.config import get_settings
 
 API = "https://openaccess-api.clevelandart.org/api/artworks/"
 CATEGORIES = [
-    {"slug": slug, "name": name, "image": "/images/placeholder.svg"}
+    {"slug": slug, "name": name, "image": f"/images/categories/{slug}.jpg"}
     for slug, name in [
         ("jewelry", "Joias"),
         ("fine-art", "Belas-artes"),

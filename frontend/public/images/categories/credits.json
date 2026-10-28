@@ -1,0 +1,51 @@
+[
+  {
+    "category": "jewelry",
+    "title": "Necklace",
+    "source": "https://clevelandart.org/art/1928.234",
+    "image": "https://openaccess-cdn.clevelandart.org/1928.234/1928.234_web.jpg",
+    "license": "CC0"
+  },
+  {
+    "category": "fine-art",
+    "title": "Twilight in the Wilderness",
+    "source": "https://clevelandart.org/art/1965.233",
+    "image": "https://openaccess-cdn.clevelandart.org/1965.233/1965.233_web.jpg",
+    "license": "CC0"
+  },
+  {
+    "category": "horology",
+    "title": "Watch",
+    "source": "https://clevelandart.org/art/1916.322",
+    "image": "https://openaccess-cdn.clevelandart.org/1916.322/1916.322_web.jpg",
+    "license": "CC0"
+  },
+  {
+    "category": "ceramics",
+    "title": "Amphora Vase",
+    "source": "https://clevelandart.org/art/1944.190",
+    "image": "https://openaccess-cdn.clevelandart.org/1944.190/1944.190_web.jpg",
+    "license": "CC0"
+  },
+  {
+    "category": "furniture",
+    "title": "Miniature Chair",
+    "source": "https://clevelandart.org/art/1966.454",
+    "image": "https://openaccess-cdn.clevelandart.org/1966.454/1966.454_web.jpg",
+    "license": "CC0"
+  },
+  {
+    "category": "coins-manuscripts",
+    "title": "Coin",
+    "source": "https://clevelandart.org/art/1999.227",
+    "image": "https://openaccess-cdn.clevelandart.org/1999.227/1999.227_web.jpg",
+    "license": "CC0"
+  },
+  {
+    "category": "curiosities",
+    "title": "The Age of Bronze",
+    "source": "https://clevelandart.org/art/1918.328",
+    "image": "https://openaccess-cdn.clevelandart.org/1918.328/1918.328_web.jpg",
+    "license": "CC0"
+  }
+]

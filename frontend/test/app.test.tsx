@@ -176,7 +176,11 @@ test('account page submits simulated deposit with idempotency and refreshes bala
         role: 'bidder',
         active: true,
       }
-    else if (path.endsWith('/wallets/me/entries')) data = []
+    else if (
+      path.endsWith('/wallets/me/entries') ||
+      path.includes('/bidders/me/participations')
+    )
+      data = []
     else if (path.endsWith('/wallets/me/deposits')) {
       expect(JSON.parse(String(options?.body)).amount_cents).toBe(10000)
       expect(new Headers(options?.headers).get('Idempotency-Key')).toBeTruthy()

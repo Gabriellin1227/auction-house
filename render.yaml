@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: yorknew-api
+    runtime: docker
+    plan: starter
+    region: virginia
+    dockerfilePath: ./backend/Dockerfile.render
+    dockerContext: ./backend
+    healthCheckPath: /ready
+    autoDeployTrigger: off
+    disk:
+      name: yorknew-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: AUDIT_SECRET
+        generateValue: true
+      - key: MEDIA_DIR
+        value: /data/media
+      - key: AUDIT_DIR
+        value: /data/audit
+      - key: WORKER_REQUIRED
+        value: 'true'
+      - key: EVENTS_ENABLED
+        value: 'true'
+      - key: ACCESS_TOKEN_MINUTES
+        value: '30'

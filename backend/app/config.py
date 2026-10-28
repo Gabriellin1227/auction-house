@@ -17,6 +17,10 @@ class Settings(BaseSettings):
         "postgresql+psycopg://auction:auction_dev@localhost:5433/auction_house"
     )
     database_url_unpooled: SecretStr | None = None
+    cors_origins: list[str] = []
+    worker_required: bool = False
+    events_enabled: bool = True
+    audit_dir: Path = BACKEND_ROOT / "audit"
     media_dir: Path = BACKEND_ROOT / "media"
     auth_secret: SecretStr | None = None
     audit_secret: SecretStr | None = None
