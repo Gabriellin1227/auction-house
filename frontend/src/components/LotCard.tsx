@@ -15,7 +15,7 @@ export default function LotCard({ lot }: LotCardProps) {
     <Link
       className="lot"
       to={{ pathname: `/lots/${lot.id}`, search }}
-      aria-label={`View ${lot.title}`}
+      aria-label={`Ver ${lot.title}`}
     >
       <div className="lot__media">
         <span className="lot__timer">{label}</span>
@@ -31,15 +31,15 @@ export default function LotCard({ lot }: LotCardProps) {
       </div>
       <div className="lot__body">
         <span className="lot__meta">
-          Lot {lot.number} · {lot.categoryName}
+          Lote {lot.number} · {lot.categoryName}
         </span>
         <h3 className="lot__title">{lot.title}</h3>
         <div className="lot__foot">
           <div>
-            <span className="lot__label">Lance Atual</span>
+            <span className="lot__label">Lance atual</span>
             <span className="lot__price">{formatMoney(lot.currentBid)}</span>
           </div>
-          <span className="lot__bids">{lot.bids} Lances</span>
+          <span className="lot__bids">{lot.bids} lances</span>
         </div>
       </div>
     </Link>

@@ -16,9 +16,13 @@ import Dialog from './components/Dialog'
 import AuthForm from './components/AuthForm'
 import CataloguePage from './pages/CataloguePage'
 import LotDetailsPage from './pages/LotDetailsPage'
+import AccountPage from './pages/AccountPage'
 import type { User } from './types'
 
 export interface CatalogueNavigation {
+  user: User | null
+  setUser: (user: User | null) => void
+  requestLogin: () => void
   selectCategory: (slug: string) => void
 }
 
@@ -70,14 +74,23 @@ function Layout() {
       <main id="page-content" tabIndex={-1}>
         {USE_MOCK && (
           <p className="preview-note container">
-            Preview do Catalógo · Lotes Ilustrativos.
+            Prévia do catálogo · Lotes ilustrativos.
           </p>
         )}
-        <Outlet context={{ selectCategory } satisfies CatalogueNavigation} />
+        <Outlet
+          context={
+            {
+              selectCategory,
+              user,
+              setUser,
+              requestLogin: () => setDialog('login'),
+            } satisfies CatalogueNavigation
+          }
+        />
       </main>
       {(dialog === 'login' || dialog === 'register') && (
         <Dialog
-          title={dialog === 'login' ? 'Sign in' : 'Create account'}
+          title={dialog === 'login' ? 'Entrar' : 'Criar conta'}
           onClose={() => setDialog(null)}
         >
           <AuthForm
@@ -90,7 +103,7 @@ function Layout() {
         </Dialog>
       )}
       {dialog === 'help' && (
-        <Dialog title="How it works" onClose={() => setDialog(null)}>
+        <Dialog title="Como funciona" onClose={() => setDialog(null)}>
           <p>
             Crie uma conta de licitante para participar, ou uma conta de
             leiloeiro para gerenciar seus lotes. Este catálogo é uma prévia
@@ -113,6 +126,7 @@ export default function App() {
         <Route element={<Layout />}>
           <Route index element={<CataloguePage />} />
           <Route path="lots/:lotId" element={<LotDetailsPage />} />
+          <Route path="account" element={<AccountPage />} />
           <Route
             path="*"
             element={

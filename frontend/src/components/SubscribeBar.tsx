@@ -3,10 +3,10 @@ export default function SubscribeBar() {
     <section className="subscribe">
       <div className="container subscribe__row">
         <p className="subscribe__text">
-          <strong>Acesso a catálogo privado.</strong> Descubra o leilão York
-          New. Assine em breve nosos NewsLetter.
+          <strong>O acervo Yorknew.</strong> Explore objetos, descubra histórias
+          e acompanhe os lotes publicados.
         </p>
-        <span className="muted">Catalogo sempre atualizado!</span>
+        <span className="muted">Uma nova descoberta a cada lote.</span>
       </div>
     </section>
   )

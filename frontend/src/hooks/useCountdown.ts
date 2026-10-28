@@ -20,7 +20,7 @@ export function useCountdown(endsAt: number): {
   const s = String(total % 60).padStart(2, '0')
 
   return {
-    label: left === 0 ? 'Closed' : `${h}h ${m}m ${s}s`,
+    label: left === 0 ? 'Encerrado' : `${h}h ${m}m ${s}s`,
     closed: left === 0,
   }
 }

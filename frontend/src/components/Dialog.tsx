@@ -19,7 +19,7 @@ export default function Dialog({
     <dialog ref={ref} className="dialog" aria-label={title} onCancel={onClose}>
       <div className="dialog__heading">
         <h2>{title}</h2>
-        <button type="button" aria-label="Close dialog" onClick={onClose}>
+        <button type="button" aria-label="Fechar janela" onClick={onClose}>
           ×
         </button>
       </div>

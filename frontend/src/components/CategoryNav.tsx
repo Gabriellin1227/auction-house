@@ -4,7 +4,7 @@ interface NavItem {
 }
 
 const ITEMS: NavItem[] = [
-  { slug: '', label: 'All Lots' },
+  { slug: '', label: 'Todos os lotes' },
   { slug: 'jewelry', label: 'Joias' },
   { slug: 'fine-art', label: 'Arte Moderna' },
   { slug: 'horology', label: 'Relojoaria' },
@@ -26,7 +26,7 @@ export default function CategoryNav({
   onHowItWorks,
 }: CategoryNavProps) {
   return (
-    <nav className="catnav" aria-label="Categories">
+    <nav className="catnav" aria-label="Categorias">
       <div className="container catnav__row">
         <ul className="catnav__list">
           {ITEMS.map((item) => (
@@ -41,7 +41,7 @@ export default function CategoryNav({
           ))}
         </ul>
         <button className="catnav__item" onClick={onHowItWorks}>
-          Como isso funciona
+          Como funciona
         </button>
       </div>
     </nav>

@@ -31,7 +31,7 @@ export default function LotGrid({
         <SectionTitle eyebrow={eyebrow} title={title} />
         {error && (
           <p className="muted">
-            Não foi possivel carregar os lotes. {error.message}
+            Não foi possível carregar os lotes. {error.message}
           </p>
         )}
         {loading && <p className="muted">Carregando...</p>}

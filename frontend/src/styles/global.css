@@ -4,10 +4,10 @@
   --bg-banner: #1a120c;
   --line: #2a2119;
   --text: #f3ece0;
-  --muted: #9b8f7e;
+  --muted: #a89c8a;
   --gold: #d9a94b;
   --gold-dark: #b98a32;
-  --red: #c0392b;
+  --red: #e5584b;
   --serif: 'Cormorant Garamond', Georgia, serif;
   --sans: 'Kumbh Sans', system-ui, sans-serif;
   --maxw: 1232px;
@@ -27,7 +27,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
-  font-weight: 300;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -66,7 +66,7 @@ ul {
 /* Buttons */
 .btn {
   padding: 10px 20px;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   font-weight: 500;
@@ -83,7 +83,7 @@ ul {
   cursor: default;
 }
 .link-btn {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
 }
@@ -157,7 +157,7 @@ ul {
   gap: 28px;
 }
 .catnav__item {
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--muted);
@@ -212,7 +212,7 @@ ul {
 }
 .eyebrow {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.25em;
   text-transform: uppercase;
   color: var(--red);
@@ -289,7 +289,7 @@ ul {
 }
 .stats__label {
   margin-top: 4px;
-  font-size: 11px;
+  font-size: 12px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--gold-dark);
@@ -334,7 +334,7 @@ ul {
   z-index: 1;
   padding: 4px 8px;
   background: rgba(10, 6, 4, 0.8);
-  color: #d6453a;
+  color: #e5584b;
   font-size: 12px;
   letter-spacing: 0.05em;
 }
@@ -342,7 +342,7 @@ ul {
   padding: 20px;
 }
 .lot__meta {
-  font-size: 10px;
+  font-size: 12px;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--muted);
@@ -364,7 +364,7 @@ ul {
 }
 .lot__label {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   letter-spacing: 0.05em;
   margin-bottom: 2px;
@@ -375,7 +375,7 @@ ul {
   color: var(--gold);
 }
 .lot__bids {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 
@@ -624,7 +624,7 @@ a.lot {
   color: var(--muted);
   border: 1px solid var(--line);
   padding: 6px 10px;
-  font-size: 11px;
+  font-size: 12px;
 }
 .lot-details h1 {
   font-family: var(--serif);
@@ -647,7 +647,7 @@ a.lot {
 }
 .lot-details__price > span,
 .lot-details__countdown > span {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -750,5 +750,120 @@ a.lot {
     display: inline-flex;
     align-items: center;
     min-height: 48px;
+  }
+}
+
+@media (max-width: 768px) {
+  button,
+  .link-btn,
+  .catnav__item {
+    min-height: 48px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.account-page {
+  padding-top: 32px;
+}
+.account-page h1 {
+  font: 400 44px var(--serif);
+  margin-bottom: 12px;
+}
+.account-section {
+  padding: 32px 0;
+  border-bottom: 1px solid var(--line);
+  line-height: 1.7;
+}
+.account-section h2 {
+  font: 400 30px var(--serif);
+  margin-bottom: 18px;
+}
+.account-section .auth-form {
+  max-width: 600px;
+}
+.account-inline {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 20px 0;
+}
+.account-inline label {
+  display: grid;
+  gap: 8px;
+}
+.account-inline input {
+  padding: 12px;
+  background: var(--bg-elev);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+.account-section a {
+  color: var(--gold);
+}
+.account-list > * {
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+.account-list button {
+  padding: 10px 16px;
+  border: 1px solid var(--gold-dark);
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.wallet-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.wallet-summary > div {
+  border: 1px solid var(--line);
+  padding: 20px;
+  display: grid;
+  gap: 8px;
+}
+.wallet-summary strong {
+  color: var(--gold);
+  font: 400 28px var(--serif);
+}
+.import-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 16px;
+}
+.import-card {
+  padding: 12px;
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+.import-card img {
+  width: 100%;
+  height: 120px;
+  object-fit: contain;
+}
+.import-card small {
+  color: var(--gold);
+}
+.account-editor {
+  margin-block: 24px;
+  padding: 24px;
+  border: 1px solid var(--gold-dark);
+}
+@media (max-width: 768px) {
+  .wallet-summary {
+    grid-template-columns: 1fr;
   }
 }

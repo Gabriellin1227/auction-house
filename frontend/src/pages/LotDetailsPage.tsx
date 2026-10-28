@@ -28,7 +28,13 @@ function LotInformation({ lot }: { lot: Lot }) {
           <div className="lot-details__meta">
             <span className="eyebrow">Lote {lot.number}</span>
             <span className="lot-status">
-              {USE_MOCK ? 'Prévia' : closed ? 'Encerrado' : 'Catálogo'}
+              {USE_MOCK
+                ? 'Prévia'
+                : lot.status === 'scheduled'
+                  ? 'Agendado'
+                  : closed
+                    ? 'Prazo encerrado'
+                    : 'Ao vivo'}
             </span>
           </div>
           <h1 id="lot-title">{lot.title}</h1>
@@ -46,7 +52,7 @@ function LotInformation({ lot }: { lot: Lot }) {
             <strong>{label}</strong>
           </div>
           <button className="btn btn--gold lot-details__bid" disabled>
-            Lances indisponíveis nesta prévia
+            Lances em breve
           </button>
           <p className="lot-details__notice">
             {USE_MOCK
@@ -76,6 +82,33 @@ function LotInformation({ lot }: { lot: Lot }) {
                 </time>
               </dd>
             </div>
+            {Boolean(lot.attributes?.technique) && (
+              <div>
+                <dt>Técnica</dt>
+                <dd>{String(lot.attributes?.technique)}</dd>
+              </div>
+            )}
+            {Boolean(lot.attributes?.date) && (
+              <div>
+                <dt>Data da obra</dt>
+                <dd>{String(lot.attributes?.date)}</dd>
+              </div>
+            )}
+            {lot.sourceUrl && (
+              <div>
+                <dt>Proveniência</dt>
+                <dd>
+                  <a
+                    className="back-link"
+                    href={lot.sourceUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Ver registro no museu
+                  </a>
+                </dd>
+              </div>
+            )}
           </dl>
         </section>
         <section aria-labelledby="bid-history">

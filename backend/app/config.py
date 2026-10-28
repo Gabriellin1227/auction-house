@@ -17,6 +17,7 @@ class Settings(BaseSettings):
         "postgresql+psycopg://auction:auction_dev@localhost:5433/auction_house"
     )
     database_url_unpooled: SecretStr | None = None
+    media_dir: Path = BACKEND_ROOT / "media"
     auth_secret: SecretStr | None = None
     access_token_minutes: int = Field(default=30, ge=1, le=120)
 

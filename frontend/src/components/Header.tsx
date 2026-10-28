@@ -51,15 +51,17 @@ export default function Header({
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Search lots, origins, categories..."
-            aria-label="Search"
+            placeholder="Buscar lotes, origens e categorias..."
+            aria-label="Buscar"
           />
         </form>
 
         <div className="header__actions">
           {userName ? (
             <>
-              <span className="account-name">{userName}</span>
+              <Link className="account-name" to="/account">
+                Minha conta · {userName}
+              </Link>
               <button className="link-btn" onClick={onSignOut}>
                 Sair
               </button>
@@ -67,10 +69,10 @@ export default function Header({
           ) : (
             <>
               <button className="link-btn" onClick={onSignIn}>
-                Login
+                Entrar
               </button>
               <button className="btn btn--gold" onClick={onRegister}>
-                Registro
+                Criar conta
               </button>
             </>
           )}

@@ -1,3 +1,4 @@
+import { USE_MOCK } from '../api/auction'
 import { useOutletContext, useSearchParams } from 'react-router-dom'
 import CategoryGrid from '../components/CategoryGrid'
 import SubscribeBar from '../components/SubscribeBar'
@@ -14,8 +15,8 @@ export default function CataloguePage() {
   if (filtering)
     return (
       <LotGrid
-        eyebrow={query ? 'Search results' : 'Browse the vault'}
-        title={query ? `“${query}”` : 'Lots'}
+        eyebrow={query ? 'Resultados da busca' : 'Explore o acervo'}
+        title={query ? `“${query}”` : 'Lotes'}
         params={{ category, q: query }}
       />
     )
@@ -24,12 +25,23 @@ export default function CataloguePage() {
       <SubscribeBar />
       <CategoryGrid onSelect={selectCategory} />
       <StatsBar />
-      <LotGrid
-        eyebrow="Last chance"
-        title="Closing Soon"
-        params={{ sort: 'ending' }}
-        limit={4}
-      />
+      {USE_MOCK ? (
+        <LotGrid
+          eyebrow="Última oportunidade"
+          title="Encerrando em breve"
+          params={{ sort: 'ending' }}
+          limit={4}
+        />
+      ) : (
+        <>
+          <LotGrid
+            title="Ao vivo"
+            params={{ status: 'live', sort: 'ending' }}
+          />
+          <LotGrid title="Agendados" params={{ status: 'scheduled' }} />
+          <LotGrid title="Encerrados" params={{ status: 'closed' }} />
+        </>
+      )}
     </>
   )
 }
