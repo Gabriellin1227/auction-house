@@ -65,10 +65,10 @@ export default function AuthForm({
       </label>
       {mode === 'register' && (
         <label>
-          Account type
+          Tipo de Conta
           <select name="role">
-            <option value="bidder">Bidder</option>
-            <option value="auctioneer">Auctioneer</option>
+            <option value="bidder">Licitante</option>
+            <option value="auctioneer">Leiloeiro(a)</option>
           </select>
         </label>
       )}

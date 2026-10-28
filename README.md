@@ -13,7 +13,7 @@ npm run dev
 
 Abra http://localhost:5173. Para login/cadastro reais, mantenha FastAPI em localhost:8000; o Vite encaminha `/api` ao backend removendo esse prefixo. Use as contas demo abaixo ou cadastre uma conta. O token fica apenas na memória: atualizar a página exige novo login.
 
-O catálogo está em modo demonstrativo por padrão, identificado na tela; busca, categorias e detalhes funcionam com os dados do ZIP. Lotes/lances reais ainda dependem das próximas entregas. Newsletter não está ativa. O ZIP não continha imagens; um placeholder local foi incluído.
+O catálogo está em modo demonstrativo por padrão, identificado na tela; busca e categorias funcionam com os dados do ZIP. Cada card abre uma página em `/lots/:id`, com URL própria, imagem, preço, prazo e informações. Header e categorias permanecem no layout fixo durante navegação/rolagem; voltar à vitrine preserva filtros na URL. Links diretos e recarregamento são suportados no Vite e no Nginx. Lotes/lances reais ainda dependem das próximas entregas. Newsletter não está ativa. O ZIP não continha imagens; um placeholder local foi incluído.
 
 Configuração opcional em frontend/.env (base em frontend/.env.example): VITE_API_URL=/api e VITE_USE_MOCK=true. Mudar para false exige implementar os endpoints de categorias, lotes e estatísticas. Não há fallback silencioso para dados fictícios quando a API real falha.
 

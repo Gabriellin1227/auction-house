@@ -12,10 +12,10 @@ export default function CategoryGrid({ onSelect }: CategoryGridProps) {
   return (
     <section className="section">
       <div className="container">
-        <SectionTitle eyebrow="Browse the vault" title="Main Categories" />
+        <SectionTitle eyebrow="Explore o Cofre" title="Categorias Principais" />
         {error && (
           <p role="alert" className="muted">
-            Could not load categories. {error.message}
+            Não foi possivel carregar as categorias. {error.message}
           </p>
         )}
         <div className="catgrid">

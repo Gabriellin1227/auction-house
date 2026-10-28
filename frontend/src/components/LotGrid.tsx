@@ -2,14 +2,13 @@ import { fetchLots } from '../api/auction'
 import { useAsync } from '../hooks/useAsync'
 import LotCard from './LotCard'
 import SectionTitle from './SectionTitle'
-import type { Lot, LotsQuery } from '../types'
+import type { LotsQuery } from '../types'
 
 interface LotGridProps {
   eyebrow?: string
   title: string
   params: LotsQuery
   limit?: number
-  onOpenLot?: (lot: Lot) => void
 }
 
 export default function LotGrid({
@@ -17,7 +16,6 @@ export default function LotGrid({
   title,
   params,
   limit,
-  onOpenLot,
 }: LotGridProps) {
   const key = JSON.stringify(params)
   const {
@@ -31,14 +29,18 @@ export default function LotGrid({
     <section className="section">
       <div className="container">
         <SectionTitle eyebrow={eyebrow} title={title} />
-        {error && <p className="muted">Could not load lots. {error.message}</p>}
-        {loading && <p className="muted">Loading…</p>}
+        {error && (
+          <p className="muted">
+            Não foi possivel carregar os lotes. {error.message}
+          </p>
+        )}
+        {loading && <p className="muted">Carregando...</p>}
         {!loading && !error && visible?.length === 0 && (
-          <p className="muted">No lots found.</p>
+          <p className="muted">Não foram encontrados lotes.</p>
         )}
         <div className="lotgrid">
           {visible?.map((lot) => (
-            <LotCard key={lot.id} lot={lot} onOpen={onOpenLot} />
+            <LotCard key={lot.id} lot={lot} />
           ))}
         </div>
       </div>

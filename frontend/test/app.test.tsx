@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, expect, test, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, expect, test, vi } from 'vitest'
 import {
   cleanup,
   fireEvent,
@@ -8,7 +8,11 @@ import {
 } from '@testing-library/react'
 import App from '../src/App'
 
+beforeEach(() => {
+  window.history.replaceState({}, '', '/')
+})
 beforeAll(() => {
+  window.scrollTo = vi.fn()
   HTMLDialogElement.prototype.showModal = function () {
     this.setAttribute('open', '')
   }
@@ -18,32 +22,43 @@ beforeAll(() => {
 })
 afterEach(cleanup)
 
-test('imports catalogue and supports search, keyboard details and clearing search', async () => {
+test('navigates to lot page, keeps header mounted and preserves search on return', async () => {
   render(<App />)
   expect(
-    await screen.findByRole('button', {
+    await screen.findByRole('link', {
       name: 'View Portrait of a Saint, Oil on Canvas',
     }),
   ).toBeInTheDocument()
   const search = screen.getByRole('textbox', { name: 'Search' })
   fireEvent.change(search, { target: { value: 'Emerald' } })
   fireEvent.submit(search.closest('form')!)
-  const lot = await screen.findByRole('button', {
+  const lot = await screen.findByRole('link', {
     name: 'View Emerald Pendant Necklace',
   })
   await waitFor(() =>
     expect(
-      screen.queryByRole('button', { name: /View Portrait/ }),
+      screen.queryByRole('link', { name: /View Portrait/ }),
     ).not.toBeInTheDocument(),
   )
-  fireEvent.keyDown(lot, { key: 'Enter' })
+  const header = screen.getByRole('banner')
+  fireEvent.click(lot)
   expect(
-    screen.getByRole('dialog', { name: 'Emerald Pendant Necklace' }),
+    await screen.findByRole('heading', {
+      level: 1,
+      name: 'Emerald Pendant Necklace',
+    }),
   ).toBeInTheDocument()
-  fireEvent.click(screen.getByRole('button', { name: 'Close dialog' }))
+  expect(window.location.pathname).toBe('/lots/1')
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(screen.getByRole('banner')).toBe(header)
+  fireEvent.click(screen.getByRole('link', { name: 'Vitrine' }))
+  expect(window.location.search).toBe('?q=Emerald')
+  expect(
+    await screen.findByRole('link', { name: 'View Emerald Pendant Necklace' }),
+  ).toBeInTheDocument()
   fireEvent.click(screen.getByRole('link', { name: /The Yorknew/ }))
   expect(
-    await screen.findByRole('heading', { name: 'Main Categories' }),
+    await screen.findByRole('heading', { name: 'Categorias Principais' }),
   ).toBeInTheDocument()
 })
 
@@ -69,7 +84,7 @@ test('login submits to the real FastAPI contract while catalogue uses mocks', as
   vi.stubGlobal('fetch', fetch)
   try {
     render(<App />)
-    fireEvent.click(screen.getByRole('button', { name: 'Sign in' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Login' }))
     fireEvent.change(screen.getByLabelText('Email'), {
       target: { value: 'cliente1@example.com' },
     })
@@ -86,9 +101,58 @@ test('login submits to the real FastAPI contract while catalogue uses mocks', as
     expect(fetch.mock.calls[1][1].headers.get('Authorization')).toBe(
       'Bearer test-token',
     )
-    fireEvent.click(screen.getByRole('button', { name: 'Sign out' }))
-    expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Sair' }))
+    expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument()
   } finally {
     vi.unstubAllGlobals()
   }
+})
+
+test('opens a lot directly from its URL and preserves the header on browser back', async () => {
+  window.history.replaceState({}, '', '/lots/8')
+  render(<App />)
+  expect(
+    await screen.findByRole('heading', {
+      level: 1,
+      name: 'Portrait of a Saint, Oil on Canvas',
+    }),
+  ).toBeInTheDocument()
+  const header = screen.getByRole('banner')
+  fireEvent.click(screen.getByRole('link', { name: /The Yorknew/ }))
+  expect(
+    await screen.findByRole('heading', { name: 'Categorias Principais' }),
+  ).toBeInTheDocument()
+  window.history.back()
+  expect(
+    await screen.findByRole('heading', {
+      level: 1,
+      name: 'Portrait of a Saint, Oil on Canvas',
+    }),
+  ).toBeInTheDocument()
+  expect(screen.getByRole('banner')).toBe(header)
+})
+
+test('unknown lot shows a recovery link and the shared header', async () => {
+  window.history.replaceState({}, '', '/lots/unknown')
+  render(<App />)
+  expect(
+    await screen.findByRole('heading', { name: 'Lote não encontrado' }),
+  ).toBeInTheDocument()
+  expect(screen.getByRole('banner')).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('link', { name: 'Voltar à vitrine' }))
+  expect(
+    await screen.findByRole('heading', { name: 'Categorias Principais' }),
+  ).toBeInTheDocument()
+})
+
+test('translated category navigation uses catalogue IDs and updates the URL', async () => {
+  render(<App />)
+  fireEvent.click(screen.getByRole('button', { name: 'Joias' }))
+  expect(window.location.search).toBe('?category=jewelry')
+  expect(
+    await screen.findByRole('link', { name: 'View Emerald Pendant Necklace' }),
+  ).toBeInTheDocument()
+  expect(
+    screen.queryByRole('link', { name: /View Portrait/ }),
+  ).not.toBeInTheDocument()
 })
