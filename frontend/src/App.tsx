@@ -106,9 +106,11 @@ function Layout() {
         <Dialog title="Como funciona" onClose={() => setDialog(null)}>
           <p>
             Crie uma conta de licitante para participar, ou uma conta de
-            leiloeiro para gerenciar seus lotes. Este catálogo é uma prévia
-            visual. Leilões ao vivo, depósitos em carteira e a realização de
-            lances serão integrados nas próximas etapas.
+            leiloeiro para gerenciar seus lotes. Deposite saldo simulado em
+            Minha conta e ofereça lances na página de um lote aberto. O saldo do
+            líder fica reservado e é liberado quando ele é superado. Atualize o
+            lote para acompanhar a disputa; atualização em tempo real e
+            liquidação automática serão as próximas entregas.
           </p>
         </Dialog>
       )}

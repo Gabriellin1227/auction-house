@@ -9,6 +9,8 @@ export interface Category {
 
 export interface Lot {
   id: string | number
+  leaderPublicId?: string | null
+  version?: number
   status?: string
   startsAt?: number
   increment?: number
@@ -61,8 +63,17 @@ export interface AuthResponse {
   user: User
 }
 
-export interface BidResponse {
-  ok: boolean
-  lotId: number
-  amount: number
+export interface BidRecord {
+  id: string
+  bidder_public_id: string
+  sequence: number
+  amount_cents: number
+  accepted_at: string
+}
+
+export interface BidAccepted extends BidRecord {
+  lot_id: string
+  version: number
+  ends_at: string
+  extended: boolean
 }

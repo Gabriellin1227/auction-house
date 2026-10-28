@@ -2,7 +2,7 @@
 
 A documentação de acompanhamento fica localmente em `docs/STATUS_PROJETO.md` e `docs/VERSAO_V1.md` (a pasta `docs/` está ignorada pelo Git). O documento do marco histórico também pode ser consultado com `git show v1:VERSAO_V1.md`.
 
-Casa de leilões — teste técnico Verzel. Base com PostgreSQL, modelos SQLAlchemy, migrations Alembic, Docker Compose e automações de qualidade para React/TypeScript e FastAPI/Python. CRUDs de contas e lotes, catálogo público e depósitos simulados estão implementados. Lances, eventos, liquidação e auditoria permanecem nas próximas entregas.
+Casa de leilões — teste técnico Verzel. Base com PostgreSQL, modelos SQLAlchemy, migrations Alembic, Docker Compose e automações de qualidade para React/TypeScript e FastAPI/Python. CRUDs de contas e lotes, catálogo público e depósitos simulados estão implementados. Lances transacionais com reserva/liberação de saldo, prorrogação e gravação da outbox estão implementados. Publicação em tempo real, liquidação e auditoria pública permanecem nas próximas entregas.
 
 ## Frontend Yorknew
 
@@ -17,7 +17,7 @@ Abra http://localhost:5173. Para login/cadastro reais, mantenha FastAPI em local
 
 O catálogo usa o PostgreSQL por padrão (`VITE_USE_MOCK=false`). Leiloeiros importam itens CC0 do acervo público Cleveland pela página Minha conta; título, atributos e imagem são persistidos. A vitrine não depende da API externa para exibir os lotes já publicados. `VITE_USE_MOCK=true` habilita explicitamente a prévia visual de desenvolvimento.
 
-Minha conta também oferece edição de perfil, consulta de carteira/extrato e depósito simulado idempotente para licitantes. O painel do leiloeiro cria, edita lotes agendados sem lances e cancela lotes sem lances. Lances/worker/liquidação/auditoria ainda estão nas próximas entregas.
+Minha conta também oferece edição de perfil, consulta de carteira/extrato e depósito simulado idempotente para licitantes. O painel do leiloeiro cria, edita lotes agendados sem lances e cancela lotes sem lances. A página do lote permite enviar lances em centavos, acompanhar liderança e consultar histórico público paginado. Use **Atualizar lote** para consultar a disputa entre clientes; WebSocket, worker, liquidação e auditoria pública ainda estão nas próximas entregas.
 
 Configuração opcional em frontend/.env (base em frontend/.env.example): VITE_API_URL=/api e VITE_USE_MOCK=false. Não há fallback silencioso para dados fictícios quando a API real falha.
 
@@ -88,6 +88,22 @@ Os hooks validam commits feitos por você; eles não criam commits nem fazem pus
 | `node scripts/uv.mjs run --project backend ruff format backend`                             | Formatar Python                    |
 | `node scripts/uv.mjs run --project backend uvicorn app.main:app --app-dir backend --reload` | Iniciar API                        |
 
-A API expõe `GET /health` e `GET /ready` (conexão PostgreSQL). Os testes iniciais verificam o ambiente React/DOM e o endpoint público de saúde. Testes das regras de leilão serão adicionados com a implementação.
+A API expõe `GET /health` e `GET /ready` (conexão PostgreSQL). A suíte atual tem 70 testes backend (com PostgreSQL real para integração) e dez frontend. Inclui autenticação, CRUDs, depósitos, privacidade, reservas/liberações, recusas de lance, prorrogação, rollback e concorrência no mesmo lote ou na mesma carteira.
 
 As dependências estão fixadas em `package-lock.json` e `backend/uv.lock`. Para adicionar pacotes Python, use `node scripts/uv.mjs add --project backend nome-do-pacote` e inclua o lock atualizado no commit.
+
+## Lances transacionais (entrega 4)
+
+Execute `npm run setup:env` antes de subir a API: além de `AUTH_SECRET`, agora existe `AUDIT_SECRET`, uma chave privada separada para assinar os lances. O comando preserva chaves existentes. Faça backup privado e não substitua a chave de auditoria após ter registros assinados; rotação com múltiplas versões ainda será implementada.
+
+Um licitante autenticado envia `POST /lots/{id}/bids` com `{ "amount_cents": 8000 }` para oferecer R$ 80,00. O primeiro lance precisa atingir o inicial; os próximos, o atual mais o incremento. O líder não cobre o próprio lance. Período válido: início inclusivo, fim exclusivo, usando relógio do banco após adquirir os locks.
+
+O serviço bloqueia lote e carteiras (em ordem de ID), valida saldo disponível e confirma lance, reserva, liberação anterior, extrato, cabeçalho assinado e outbox na mesma transação. O saldo total permanece igual durante a disputa. Lance nos últimos 120 segundos redefine o fim para horário do aceite + 120 segundos, preservando o prazo original.
+
+`GET /lots/{id}/bids?after=0` é público: retorna até 100 lances em ordem crescente; use a última sequência em `after` para continuar. Só expõe identificador público aleatório, valor, sequência, horário e ID do lance. `GET /lots/{id}` inclui `leaderPublicId` e `version`.
+
+Para testar, deposite saldo fictício com os dois clientes e dispute um lote com início passado e fim futuro. Confira as reservas/liberações na carteira. O frontend mostra recusas e liderança; clique em **Atualizar lote** para consultar alterações de outros clientes. A contagem no navegador é indicativa; o banco decide o prazo.
+
+Limites desta etapa: eventos permanecem pendentes na outbox; ainda não há WebSocket, liquidação ou comprovante. Depois do prazo, a reserva do vencedor continua comprometida até implementarmos o worker. Hashes/HMAC já são reais, mas ainda faltam verificação pública completa e checkpoints externos. Não há idempotência no endpoint de lance: se a resposta se perder, consulte histórico e carteira antes de reenviar; somente transações comprovadamente abortadas por deadlock/serialização são repetidas automaticamente, até três tentativas.
+
+Guia local explicado passo a passo: `docs/LANCES_TRANSACIONAIS.md` (pasta ignorada pelo Git). A documentação essencial para clonar e executar permanece neste README.

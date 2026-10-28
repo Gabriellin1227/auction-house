@@ -867,3 +867,36 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+
+.bid-form {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+}
+.bid-form label {
+  display: grid;
+  gap: 8px;
+}
+.bid-form input {
+  width: 100%;
+  padding: 12px;
+  color: var(--text);
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+.bid-history {
+  display: grid;
+  gap: 16px;
+  padding-left: 24px;
+}
+.bid-history li {
+  display: grid;
+  gap: 5px;
+  overflow-wrap: anywhere;
+}
+.bid-history span,
+.bid-history time {
+  font-size: 12px;
+  color: var(--muted);
+}

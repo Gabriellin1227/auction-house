@@ -35,3 +35,5 @@ class LotRead(BaseModel):
     increment: int
     sourceUrl: str
     attributes: dict
+    leaderPublicId: str | None = None
+    version: int = 0

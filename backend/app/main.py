@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.auctioneers.router import router as auctioneers_router
 from app.auth.router import router as auth_router
+from app.bids.router import router as bids_router
 from app.config import get_settings
 from app.db.session import get_engine
 from app.lots.router import router as lots_router
@@ -19,6 +20,7 @@ app.include_router(users_router)
 app.include_router(wallets_router)
 app.include_router(auctioneers_router)
 app.include_router(lots_router)
+app.include_router(bids_router)
 get_settings().media_dir.mkdir(parents=True, exist_ok=True)
 app.mount(
     "/media",

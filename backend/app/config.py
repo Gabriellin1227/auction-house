@@ -19,16 +19,17 @@ class Settings(BaseSettings):
     database_url_unpooled: SecretStr | None = None
     media_dir: Path = BACKEND_ROOT / "media"
     auth_secret: SecretStr | None = None
+    audit_secret: SecretStr | None = None
     access_token_minutes: int = Field(default=30, ge=1, le=120)
 
-    @field_validator("auth_secret", mode="before")
+    @field_validator("auth_secret", "audit_secret", mode="before")
     @classmethod
     def validate_auth_secret(cls, value):
         if value is None or value == "":
             return None
         secret = value.get_secret_value() if isinstance(value, SecretStr) else value
         if len(secret) < 32:
-            raise ValueError("AUTH_SECRET precisa ter ao menos 32 caracteres")
+            raise ValueError("Segredos precisam ter ao menos 32 caracteres")
         return value
 
     def sqlalchemy_url(self, *, migrations: bool = False) -> URL:

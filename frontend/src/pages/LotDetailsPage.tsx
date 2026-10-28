@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import BidPanel, { BidHistory } from '../components/BidPanel'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import { ApiError } from '../api/client'
 import { fetchLot, USE_MOCK } from '../api/auction'
@@ -6,7 +8,8 @@ import { useCountdown } from '../hooks/useCountdown'
 import { formatMoney } from '../utils/format'
 import type { Lot } from '../types'
 
-function LotInformation({ lot }: { lot: Lot }) {
+function LotInformation({ lot: initialLot }: { lot: Lot }) {
+  const [lot, setLot] = useState(initialLot)
   const { label, closed } = useCountdown(lot.endsAt)
   return (
     <>
@@ -51,14 +54,21 @@ function LotInformation({ lot }: { lot: Lot }) {
             <span>{closed ? 'Prazo encerrado' : 'Tempo restante'}</span>
             <strong>{label}</strong>
           </div>
-          <button className="btn btn--gold lot-details__bid" disabled>
-            Lances em breve
-          </button>
-          <p className="lot-details__notice">
-            {USE_MOCK
-              ? 'Este item faz parte do catálogo ilustrativo. Nenhum lance ou cobrança será realizado.'
-              : 'O envio de lances ainda não está disponível.'}
-          </p>
+          <BidPanel
+            lot={lot}
+            closed={closed}
+            onAccepted={(bid) =>
+              setLot({
+                ...lot,
+                currentBid: bid.amount_cents,
+                bids: bid.sequence,
+                endsAt: new Date(bid.ends_at).getTime(),
+                status: 'live',
+                leaderPublicId: bid.bidder_public_id,
+                version: bid.version,
+              })
+            }
+          />
         </section>
       </div>
       <div className="lot-details__information">
@@ -114,11 +124,7 @@ function LotInformation({ lot }: { lot: Lot }) {
         <section aria-labelledby="bid-history">
           <span className="eyebrow">A disputa</span>
           <h2 id="bid-history">Histórico de lances</h2>
-          <p className="lot-details__empty">
-            {lot.bids === 0
-              ? 'Ainda não há lances registrados para este lote.'
-              : 'O histórico detalhado será disponibilizado com a integração dos leilões.'}
-          </p>
+          <BidHistory lot={lot} />
         </section>
       </div>
     </>
@@ -126,8 +132,13 @@ function LotInformation({ lot }: { lot: Lot }) {
 }
 
 function Details({ id }: { id: string }) {
+  const [revision, setRevision] = useState(0)
   const { search } = useLocation()
-  const { data: lot, loading, error } = useAsync(() => fetchLot(id), [id])
+  const {
+    data: lot,
+    loading,
+    error,
+  } = useAsync(() => fetchLot(id), [id, revision])
   const back = `/${search}`
   return (
     <article className="container lot-details">
@@ -138,6 +149,13 @@ function Details({ id }: { id: string }) {
           {lot ? `Lote ${lot.number}` : 'Detalhes do lote'}
         </span>
       </nav>
+      <button
+        className="btn btn--ghost"
+        disabled={loading}
+        onClick={() => setRevision((value) => value + 1)}
+      >
+        Atualizar lote
+      </button>
       {loading ? (
         <div role="status" className="lot-details__loading">
           Abrindo o cofre…

@@ -61,6 +61,7 @@ def client(database, monkeypatch):
     from app.main import app
 
     monkeypatch.setenv("AUTH_SECRET", "test-only-signing-key-" + "x" * 40)
+    monkeypatch.setenv("AUDIT_SECRET", "test-only-audit-key-" + "y" * 40)
     get_settings.cache_clear()
 
     def test_session():

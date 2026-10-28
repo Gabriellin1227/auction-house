@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.catalog.service import CATEGORIES, CatalogService
 from app.config import get_settings
-from app.db.models import Bid, Lot
+from app.db.models import Bid, Lot, User
 from app.lots.schemas import LotCreate, LotRead, LotUpdate
 
 
@@ -65,6 +65,10 @@ class LotService:
             increment=lot.min_increment_cents,
             sourceUrl=lot.source_url,
             attributes=lot.item_attributes,
+            leaderPublicId=str(self.session.get(User, bid.bidder_id).public_id)
+            if bid
+            else None,
+            version=lot.version,
         )
 
     def create(self, owner: UUID, data: LotCreate):
