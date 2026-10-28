@@ -3,10 +3,10 @@ export default function SubscribeBar() {
     <section className="subscribe">
       <div className="container subscribe__row">
         <p className="subscribe__text">
-          <strong>Private catalogue access.</strong> Discover the Yorknew
-          collection. Email subscriptions are coming soon.
+          <strong>O acervo Yorknew.</strong> Explore objetos, descubra histórias
+          e acompanhe os lotes publicados.
         </p>
-        <span className="muted">The collection awaits.</span>
+        <span className="muted">Uma nova descoberta a cada lote.</span>
       </div>
     </section>
   )

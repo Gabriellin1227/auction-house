@@ -20,4 +20,4 @@ def test_readiness_does_not_expose_database_errors(monkeypatch):
     with TestClient(app) as client:
         response = client.get("/ready")
     assert response.status_code == 503
-    assert response.json() == {"detail": "Database unavailable"}
+    assert response.json() == {"detail": "Banco de dados indisponível"}

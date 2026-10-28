@@ -6,13 +6,13 @@ export default function StatsBar() {
   const { data } = useAsync(fetchStats, [])
 
   const items: { value: string | number; label: string }[] = [
-    { value: data?.openLots ?? '–', label: 'Open lots' },
+    { value: data?.openLots ?? '–', label: 'Lotes ao vivo' },
     {
       value: data ? formatMoney(data.valueOnFloor) : '–',
-      label: 'Value on the floor',
+      label: 'Valor em disputa',
     },
-    { value: data?.bidsPlaced ?? '–', label: 'Bids placed' },
-    { value: data ? `${data.hoursOpen} hours` : '–', label: 'Open' },
+    { value: data?.bidsPlaced ?? '–', label: 'Lances registrados' },
+    { value: data ? `${data.hoursOpen} horas` : '–', label: 'Funcionamento' },
   ]
 
   return (

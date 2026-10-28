@@ -1,7 +1,7 @@
 // Funções de alto nível usadas pelos componentes.
 // Cada uma escolhe entre mock e API real conforme VITE_USE_MOCK.
 
-import { http, setAccessToken } from './client'
+import { ApiError, http, setAccessToken } from './client'
 import { CATEGORIES, LOTS, delay } from '../data/mock'
 import type {
   AuthResponse,
@@ -14,7 +14,7 @@ import type {
   User,
 } from '../types'
 
-export const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'
+export const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 
 export async function fetchCategories(): Promise<Category[]> {
   if (USE_MOCK) {
@@ -46,6 +46,17 @@ export async function fetchLots(params: LotsQuery = {}): Promise<Lot[]> {
   )
   const qs = new URLSearchParams(entries).toString()
   return http.get<Lot[]>(`/lots${qs ? `?${qs}` : ''}`)
+}
+
+export async function fetchLot(id: string): Promise<Lot> {
+  if (USE_MOCK) {
+    await delay()
+    const lot = LOTS.find((item) => String(item.id) === id)
+    if (!lot)
+      throw new ApiError('Este lote não está disponível no catálogo.', 404)
+    return lot
+  }
+  return http.get<Lot>(`/lots/${encodeURIComponent(id)}`)
 }
 
 export async function fetchStats(): Promise<Stats> {

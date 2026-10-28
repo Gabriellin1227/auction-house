@@ -1,6 +1,8 @@
 # Auction House
 
-Casa de leilões — teste técnico Verzel. Base com PostgreSQL, modelos SQLAlchemy, migrations Alembic, Docker Compose e automações de qualidade para React/TypeScript e FastAPI/Python. As funcionalidades de leilão ainda serão implementadas.
+A documentação de acompanhamento fica localmente em `docs/STATUS_PROJETO.md` e `docs/VERSAO_V1.md` (a pasta `docs/` está ignorada pelo Git). O documento do marco histórico também pode ser consultado com `git show v1:VERSAO_V1.md`.
+
+Casa de leilões — teste técnico Verzel. Base com PostgreSQL, modelos SQLAlchemy, migrations Alembic, Docker Compose e automações de qualidade para React/TypeScript e FastAPI/Python. CRUDs de contas e lotes, catálogo público e depósitos simulados estão implementados. Lances, eventos, liquidação e auditoria permanecem nas próximas entregas.
 
 ## Frontend Yorknew
 
@@ -13,9 +15,11 @@ npm run dev
 
 Abra http://localhost:5173. Para login/cadastro reais, mantenha FastAPI em localhost:8000; o Vite encaminha `/api` ao backend removendo esse prefixo. Use as contas demo abaixo ou cadastre uma conta. O token fica apenas na memória: atualizar a página exige novo login.
 
-O catálogo está em modo demonstrativo por padrão, identificado na tela; busca, categorias e detalhes funcionam com os dados do ZIP. Lotes/lances reais ainda dependem das próximas entregas. Newsletter não está ativa. O ZIP não continha imagens; um placeholder local foi incluído.
+O catálogo usa o PostgreSQL por padrão (`VITE_USE_MOCK=false`). Leiloeiros importam itens CC0 do acervo público Cleveland pela página Minha conta; título, atributos e imagem são persistidos. A vitrine não depende da API externa para exibir os lotes já publicados. `VITE_USE_MOCK=true` habilita explicitamente a prévia visual de desenvolvimento.
 
-Configuração opcional em frontend/.env (base em frontend/.env.example): VITE_API_URL=/api e VITE_USE_MOCK=true. Mudar para false exige implementar os endpoints de categorias, lotes e estatísticas. Não há fallback silencioso para dados fictícios quando a API real falha.
+Minha conta também oferece edição de perfil, consulta de carteira/extrato e depósito simulado idempotente para licitantes. O painel do leiloeiro cria, edita lotes agendados sem lances e cancela lotes sem lances. Lances/worker/liquidação/auditoria ainda estão nas próximas entregas.
+
+Configuração opcional em frontend/.env (base em frontend/.env.example): VITE_API_URL=/api e VITE_USE_MOCK=false. Não há fallback silencioso para dados fictícios quando a API real falha.
 
 Build: `npm run build`; preview do build: `npm run preview` (a prévia estática não inclui o proxy de desenvolvimento). O CI verifica também o build. No Docker, `npm run docker:up` sobe API, banco e frontend; abra http://localhost:5174. O Nginx encaminha `/api` à API no ambiente Docker.
 
@@ -43,7 +47,7 @@ Após rodar `npm run docker:seed`, use no **Authorize** de http://localhost:8000
 - `cliente1@example.com` e `cliente2@example.com` (bidder)
 - Senha pública de demonstração para os três: `DemoAuction2026!`
 
-Seed não altera contas existentes nem cria lote fictício. O lote de demonstração será importado da API pública na etapa seguinte. Tokens expiram em 30 minutos e exigem AUTH_SECRET privada; `setup:env` gera a chave localmente.
+Seed não altera contas existentes nem cria lote fictício. O lote de demonstração pode ser importado pelo painel do leiloeiro, a partir da API pública. Tokens expiram em 30 minutos e exigem AUTH_SECRET privada; `setup:env` gera a chave localmente.
 
 ## Preparação
 

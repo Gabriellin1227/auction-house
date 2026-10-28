@@ -6,7 +6,7 @@ RUN npm ci
 COPY tsconfig.json ./
 COPY frontend ./frontend
 ARG VITE_API_URL=/api
-ARG VITE_USE_MOCK=true
+ARG VITE_USE_MOCK=false
 ENV VITE_API_URL=$VITE_API_URL VITE_USE_MOCK=$VITE_USE_MOCK
 RUN npm run build
 

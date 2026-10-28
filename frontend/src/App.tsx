@@ -1,93 +1,96 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import {
+  BrowserRouter,
+  Link,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom'
 import Header from './components/Header'
 import CategoryNav from './components/CategoryNav'
-import SubscribeBar from './components/SubscribeBar'
-import CategoryGrid from './components/CategoryGrid'
-import StatsBar from './components/StatsBar'
-import LotGrid from './components/LotGrid'
 import { USE_MOCK, signOut } from './api/auction'
 import Dialog from './components/Dialog'
 import AuthForm from './components/AuthForm'
-import { formatMoney } from './utils/format'
-import type { User, Lot } from './types'
+import CataloguePage from './pages/CataloguePage'
+import LotDetailsPage from './pages/LotDetailsPage'
+import AccountPage from './pages/AccountPage'
+import type { User } from './types'
 
-export default function App() {
-  const [category, setCategory] = useState<string>('') // "" = todos
-  const [query, setQuery] = useState<string>('')
+export interface CatalogueNavigation {
+  user: User | null
+  setUser: (user: User | null) => void
+  requestLogin: () => void
+  selectCategory: (slug: string) => void
+}
 
-  const filtering = category !== '' || query !== ''
-
-  const selectCategory = (slug: string) => {
-    setCategory(slug)
-    setQuery('')
-  }
-
+function Layout() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [params] = useSearchParams()
+  const category = params.get('category') || ''
+  const query = params.get('q') || ''
   const [user, setUser] = useState<User | null>(null)
   const [dialog, setDialog] = useState<'login' | 'register' | 'help' | null>(
     null,
   )
-  const [lot, setLot] = useState<Lot | null>(null)
-  const openLot = (item: Lot) => setLot(item)
-  const signIn = () => setDialog('login')
-  const register = () => setDialog('register')
-  const howItWorks = () => setDialog('help')
+
+  const catalogue = (key: string, value: string) => {
+    const search = new URLSearchParams()
+    if (value) search.set(key, value)
+    navigate({ pathname: '/', search: search.toString() })
+  }
+  const selectCategory = (slug: string) => catalogue('category', slug)
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location.pathname, location.search])
 
   return (
     <>
-      <Header
-        query={query}
-        onQuery={(q) => {
-          setQuery(q)
-          setCategory('')
-        }}
-        onSignIn={signIn}
-        onRegister={register}
-        userName={user?.name}
-        onSignOut={() => {
-          signOut()
-          setUser(null)
-        }}
-      />
-      <CategoryNav
-        active={category}
-        onSelect={selectCategory}
-        onHowItWorks={howItWorks}
-      />
-
-      <main>
+      <a className="skip-link" href="#page-content">
+        Ir para o conteúdo
+      </a>
+      <div className="app-topbar">
+        <Header
+          query={query}
+          onQuery={(value) => catalogue('q', value)}
+          onSignIn={() => setDialog('login')}
+          onRegister={() => setDialog('register')}
+          userName={user?.name}
+          onSignOut={() => {
+            signOut()
+            setUser(null)
+          }}
+        />
+        <CategoryNav
+          active={category}
+          onSelect={selectCategory}
+          onHowItWorks={() => setDialog('help')}
+        />
+      </div>
+      <main id="page-content" tabIndex={-1}>
         {USE_MOCK && (
           <p className="preview-note container">
-            Catalogue preview · Illustrative lots. Bidding is not available yet.
+            Prévia do catálogo · Lotes ilustrativos.
           </p>
         )}
-        {!filtering && (
-          <>
-            <SubscribeBar />
-            <CategoryGrid onSelect={selectCategory} />
-            <StatsBar />
-            <LotGrid
-              eyebrow="Last chance"
-              title="Closing Soon"
-              params={{ sort: 'ending' }}
-              limit={4}
-              onOpenLot={openLot}
-            />
-          </>
-        )}
-
-        {filtering && (
-          <LotGrid
-            eyebrow={query ? 'Search results' : 'Browse the vault'}
-            title={query ? `“${query}”` : 'Lots'}
-            params={{ category, q: query }}
-            onOpenLot={openLot}
-          />
-        )}
+        <Outlet
+          context={
+            {
+              selectCategory,
+              user,
+              setUser,
+              requestLogin: () => setDialog('login'),
+            } satisfies CatalogueNavigation
+          }
+        />
       </main>
-
       {(dialog === 'login' || dialog === 'register') && (
         <Dialog
-          title={dialog === 'login' ? 'Sign in' : 'Create account'}
+          title={dialog === 'login' ? 'Entrar' : 'Criar conta'}
           onClose={() => setDialog(null)}
         >
           <AuthForm
@@ -100,27 +103,43 @@ export default function App() {
         </Dialog>
       )}
       {dialog === 'help' && (
-        <Dialog title="How it works" onClose={() => setDialog(null)}>
+        <Dialog title="Como funciona" onClose={() => setDialog(null)}>
           <p>
-            Create a bidder account to participate, or an auctioneer account to
-            manage your lots. This catalogue is a visual preview. Live auctions,
-            wallet deposits and bidding will be connected in the next steps.
+            Crie uma conta de licitante para participar, ou uma conta de
+            leiloeiro para gerenciar seus lotes. Este catálogo é uma prévia
+            visual. Leilões ao vivo, depósitos em carteira e a realização de
+            lances serão integrados nas próximas etapas.
           </p>
-        </Dialog>
-      )}
-      {lot && (
-        <Dialog title={lot.title} onClose={() => setLot(null)}>
-          <img className="detail-image" src={lot.image} alt={lot.title} />
-          <p className="muted">
-            Lot {lot.number} · {lot.categoryName}
-          </p>
-          <p className="detail-price">{formatMoney(lot.currentBid)}</p>
-          <p>Bidding is not available in this preview.</p>
         </Dialog>
       )}
       <footer className="footer">
-        <div className="container">© The Yorknew Underground Auction</div>
+        <div className="container">© The Yorknew Leilão Online.</div>
       </footer>
     </>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<Layout />}>
+          <Route index element={<CataloguePage />} />
+          <Route path="lots/:lotId" element={<LotDetailsPage />} />
+          <Route path="account" element={<AccountPage />} />
+          <Route
+            path="*"
+            element={
+              <section className="container section">
+                <h1>Página não encontrada</h1>
+                <Link className="back-link" to="/">
+                  Voltar à vitrine
+                </Link>
+              </section>
+            }
+          />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }

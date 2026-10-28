@@ -6,6 +6,7 @@ x-backend: &backend
     context: ./backend
     target: runtime
   environment:
+    MEDIA_DIR: /data/media
     AUTH_SECRET: ${AUTH_SECRET:-}
     ACCESS_TOKEN_MINUTES: ${ACCESS_TOKEN_MINUTES:-30}
     DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-auction}:${POSTGRES_PASSWORD:-auction_dev}@db:5432/${POSTGRES_DB:-auction_house}
@@ -67,7 +68,7 @@ services:
       dockerfile: frontend/Dockerfile
       args:
         VITE_API_URL: /api
-        VITE_USE_MOCK: ${VITE_USE_MOCK:-true}
+        VITE_USE_MOCK: ${VITE_USE_MOCK:-false}
     depends_on:
       api:
         condition: service_healthy

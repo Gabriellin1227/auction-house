@@ -1,28 +1,21 @@
+import { Link, useLocation } from 'react-router-dom'
 import { useCountdown } from '../hooks/useCountdown'
 import { formatMoney } from '../utils/format'
 import type { Lot } from '../types'
 
 interface LotCardProps {
   lot: Lot
-  onOpen?: (lot: Lot) => void
 }
 
-export default function LotCard({ lot, onOpen }: LotCardProps) {
+export default function LotCard({ lot }: LotCardProps) {
+  const { search } = useLocation()
   const { label } = useCountdown(lot.endsAt)
 
   return (
-    <article
+    <Link
       className="lot"
-      role="button"
-      aria-label={`View ${lot.title}`}
-      onClick={() => onOpen?.(lot)}
-      tabIndex={0}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault()
-          onOpen?.(lot)
-        }
-      }}
+      to={{ pathname: `/lots/${lot.id}`, search }}
+      aria-label={`Ver ${lot.title}`}
     >
       <div className="lot__media">
         <span className="lot__timer">{label}</span>
@@ -38,17 +31,17 @@ export default function LotCard({ lot, onOpen }: LotCardProps) {
       </div>
       <div className="lot__body">
         <span className="lot__meta">
-          Lot {lot.number} · {lot.categoryName}
+          Lote {lot.number} · {lot.categoryName}
         </span>
         <h3 className="lot__title">{lot.title}</h3>
         <div className="lot__foot">
           <div>
-            <span className="lot__label">Current bid</span>
+            <span className="lot__label">Lance atual</span>
             <span className="lot__price">{formatMoney(lot.currentBid)}</span>
           </div>
-          <span className="lot__bids">{lot.bids} bids</span>
+          <span className="lot__bids">{lot.bids} lances</span>
         </div>
       </div>
-    </article>
+    </Link>
   )
 }

@@ -34,7 +34,7 @@ export default function AuthForm({
       setError(
         error instanceof Error
           ? error.message
-          : 'Could not connect to the API.',
+          : 'Não foi possível conectar à API.',
       )
     } finally {
       setPending(false)
@@ -44,16 +44,16 @@ export default function AuthForm({
     <form className="auth-form" onSubmit={submit} aria-busy={pending}>
       {mode === 'register' && (
         <label>
-          Name
+          Nome
           <input name="name" autoComplete="name" maxLength={150} required />
         </label>
       )}
       <label>
-        Email
+        E-mail
         <input name="email" type="email" autoComplete="email" required />
       </label>
       <label>
-        Password
+        Senha
         <input
           name="password"
           type="password"
@@ -65,10 +65,10 @@ export default function AuthForm({
       </label>
       {mode === 'register' && (
         <label>
-          Account type
+          Tipo de Conta
           <select name="role">
-            <option value="bidder">Bidder</option>
-            <option value="auctioneer">Auctioneer</option>
+            <option value="bidder">Licitante</option>
+            <option value="auctioneer">Leiloeiro(a)</option>
           </select>
         </label>
       )}
@@ -78,11 +78,7 @@ export default function AuthForm({
         </p>
       )}
       <button className="btn btn--gold" disabled={pending}>
-        {pending
-          ? 'Please wait…'
-          : mode === 'login'
-            ? 'Sign in'
-            : 'Create account'}
+        {pending ? 'Aguarde…' : mode === 'login' ? 'Entrar' : 'Criar conta'}
       </button>
     </form>
   )

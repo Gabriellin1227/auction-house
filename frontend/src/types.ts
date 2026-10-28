@@ -8,7 +8,12 @@ export interface Category {
 }
 
 export interface Lot {
-  id: number
+  id: string | number
+  status?: string
+  startsAt?: number
+  increment?: number
+  sourceUrl?: string
+  attributes?: Record<string, unknown>
   number: string
   title: string
   category: string // slug da categoria
@@ -27,6 +32,7 @@ export interface Stats {
 }
 
 export interface LotsQuery {
+  status?: string
   category?: string
   q?: string
   sort?: 'ending' | 'price'

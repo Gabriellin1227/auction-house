@@ -19,7 +19,15 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (options.body && !(options.body instanceof URLSearchParams))
     headers.set('Content-Type', 'application/json')
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`)
-  const response = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+  let response: Response
+  try {
+    response = await fetch(`${BASE_URL}${path}`, { ...options, headers })
+  } catch {
+    throw new ApiError(
+      'Não foi possível conectar ao servidor. Tente novamente.',
+      0,
+    )
+  }
   if (!response.ok) {
     const body = await response.json().catch(() => ({}))
     const detail = body.detail
@@ -28,18 +36,26 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
         ? detail
         : Array.isArray(detail)
           ? detail
-              .map((item: { msg?: string }) => item.msg || 'Invalid value')
+              .map((item: { msg?: string }) => item.msg || 'Valor inválido')
               .join('; ')
-          : `Request failed (${response.status})`
-    throw new ApiError(message, response.status)
+          : `Falha na solicitação (${response.status})`
+    const translated: Record<string, string> = {
+      'Not authenticated': 'Entre para continuar',
+      'Not Found': 'Recurso não encontrado',
+      'Method Not Allowed': 'Operação não permitida',
+    }
+    throw new ApiError(translated[message] || message, response.status)
   }
   return (response.status === 204 ? null : await response.json()) as T
 }
 
 export const http = {
   get: <T>(path: string) => request<T>(path),
-  post: <T>(path: string, body: unknown) =>
-    request<T>(path, { method: 'POST', body: JSON.stringify(body) }),
+  post: <T>(path: string, body: unknown, headers?: HeadersInit) =>
+    request<T>(path, { method: 'POST', body: JSON.stringify(body), headers }),
+  patch: <T>(path: string, body: unknown) =>
+    request<T>(path, { method: 'PATCH', body: JSON.stringify(body) }),
+  delete: (path: string) => request<null>(path, { method: 'DELETE' }),
   form: <T>(path: string, body: URLSearchParams) =>
     request<T>(path, { method: 'POST', body }),
 }

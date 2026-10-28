@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 
@@ -29,17 +30,9 @@ export default function Header({
   return (
     <header className="header">
       <div className="container header__row">
-        <a
-          className="logo"
-          href="/"
-          onClick={(e) => {
-            e.preventDefault()
-            onQuery('')
-            setValue('')
-          }}
-        >
-          <span className="logo__gold">The Yorknew</span> Underground Auction
-        </a>
+        <Link className="logo" to="/" onClick={() => setValue('')}>
+          <span className="logo__gold">The Yorknew</span> Leilão Online
+        </Link>
 
         <form className="search" onSubmit={submit} role="search">
           <svg
@@ -58,26 +51,28 @@ export default function Header({
             type="text"
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            placeholder="Search lots, origins, categories..."
-            aria-label="Search"
+            placeholder="Buscar lotes, origens e categorias..."
+            aria-label="Buscar"
           />
         </form>
 
         <div className="header__actions">
           {userName ? (
             <>
-              <span className="account-name">{userName}</span>
+              <Link className="account-name" to="/account">
+                Minha conta · {userName}
+              </Link>
               <button className="link-btn" onClick={onSignOut}>
-                Sign out
+                Sair
               </button>
             </>
           ) : (
             <>
               <button className="link-btn" onClick={onSignIn}>
-                Sign in
+                Entrar
               </button>
               <button className="btn btn--gold" onClick={onRegister}>
-                Register
+                Criar conta
               </button>
             </>
           )}
