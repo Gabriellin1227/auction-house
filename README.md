@@ -192,7 +192,7 @@ npm run build
 
 A URL acima é exclusiva de desenvolvimento local. Testes PostgreSQL usam schemas temporários e os removem ao final; não adulteram o schema demo. Sem `TEST_DATABASE_URL`, testes de integração são pulados e não validam locks. Para o ambiente de teste Docker: `npm run db:test`.
 
-Validação local mais recente: **118 testes backend e 22 frontend aprovados**, além de lint, formatação, tipagem e build.
+Validação local mais recente: **119 testes backend e 22 frontend aprovados**, além de lint, formatação, tipagem e build.
 
 Cobertura inclui autenticação/papéis, CRUDs, snapshot offline, depósito idempotente, reserva/liberação, concorrência, prorrogação, rollback, liquidação repetida, dois workers, reconexão, privacidade, adulteração de lances, remoção de cauda/meio e rollback com checkpoint preservado.
 

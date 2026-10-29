@@ -11,7 +11,7 @@ O destino pretendido é:
 | Interface React   | Vercel                        | Autenticada, projeto vinculado; sem deploy público                                                               |
 | PostgreSQL        | Neon                          | Autenticado; projeto isolado `yorknew-auction-house` criado em AWS us-east-1, PostgreSQL 17 e compute de 0,25 CU |
 | API + worker      | Northflank Sandbox            | Conta Free conectada; verificação manual do cartão e confirmação do volume pendentes                             |
-| Imagens + journal | Volume persistente do serviço | Confirmar disponibilidade dentro da franquia gratuita antes de provisionar                                       |
+| Imagens + journal | Volume persistente do serviço | Opção gratuita de 6 GB confirmada no formulário; criação depende da verificação da conta                         |
 
 Essa tabela registra preparação; não significa que o site está publicado.
 
@@ -25,7 +25,7 @@ Referência: [limites do Render Free](https://render.com/docs/free).
 
 O plano Sandbox anunciado inclui dois serviços, dois jobs, um banco/addon, serviços sem suspensão e franquia de até US$ 20 mensais em recursos, sem cartão. A disponibilidade efetiva e as cotas devem ser conferidas na conta. Não fazer upgrade para um plano pago ou cadastrar cartão para completar este roteiro.
 
-O primeiro objetivo é usar **um serviço combinado** com API e worker, uma instância e volume de 1 GB. O Dockerfile `backend/Dockerfile.render` é reaproveitável: o nome foi escolhido para o primeiro destino, mas o comando `python -m app.deploy` não depende da API do Render. Ele usa PostgreSQL externo, variáveis de ambiente e o diretório persistente `/data`.
+O primeiro objetivo é usar **um serviço combinado** com API e worker, uma instância e volume de 6 GB. O Dockerfile `backend/Dockerfile.render` é reaproveitável: o nome foi escolhido para o primeiro destino, mas o comando `python -m app.deploy` não depende da API do Render. Ele usa PostgreSQL externo, variáveis de ambiente e o diretório persistente `/data`.
 
 Referências: [preços Northflank](https://northflank.com/pricing), [plano Sandbox](https://northflank.com/docs/v1/application/billing/pricing-on-northflank), [volumes](https://northflank.com/docs/v1/application/databases-and-persistence/add-a-volume).
 
@@ -42,7 +42,7 @@ Uma franquia gratuita não significa recursos ilimitados ou um contrato de dispo
 - Porta HTTP: 10000; configurar `PORT=10000`.
 - Healthcheck: `GET /ready`.
 - Instâncias: uma.
-- Volume: 1 GB, montado em `/data`.
+- Volume: 6 GB, montado em `/data` (opção permitida no projeto gratuito).
 - Execução: `python -m app.deploy`, já definido na imagem.
 
 Variáveis privadas do serviço:
@@ -107,3 +107,22 @@ O workflow `.github/workflows/publish-api.yml` constrói `backend/Dockerfile.ren
 Destino: `ghcr.io/gabriellin1227/auction-house-api`. Antes de usá-la como imagem pública no Northflank, conferir a conclusão do workflow, a visibilidade do pacote e um pull anônimo. A publicação do pacote não equivale a site publicado.
 
 No Northflank, a modalidade **Deployment** executa a imagem pronta. Isso evita depender do vínculo GitHub App/time, que ainda não estava aparecendo como associado mesmo com o aplicativo já instalado na conta. Não foi necessário alterar as permissões existentes do GitHub App.
+
+## Estado confirmado do serviço preparado
+
+- Serviço `yorknew-api`, projeto `Default`, região US - Central.
+- Fonte GitHub `Gabriellin1227/auction-house`, branch `main`; vínculo agora disponível no formulário.
+- Contexto `/backend`, Dockerfile `/backend/Dockerfile.render`, validado pelo painel.
+- Plano gratuito `nf-compute-20`: 0,2 vCPU compartilhada, 512 MB, uma instância.
+- Porta pública HTTP 10000, healthcheck `/ready`, intervalo de 10 s e timeout de 5 s.
+- Onze variáveis de execução preenchidas e comparadas com a configuração privada; nenhum segredo incluído no build/frontend/Git.
+- Volume `yorknew-data`, `/data`, 6 GB: o painel informa que não será cobrado neste projeto Free.
+- Cadastro de cartão ainda precisa ser concluído manualmente pelo desenvolvedor. O painel continua informando falta de pagamento padrão verificado. A tentativa de criação do volume parou na validação de nome/país do formulário de pagamento; nenhum volume nem serviço foi criado.
+
+A imagem também está publicada e disponível sem autenticação em `ghcr.io/gabriellin1227/auction-house-api:latest`. Workflow de publicação e CI do commit `d052fca` concluíram com sucesso. A modalidade Combined (Git + build) já está preparada no Northflank; a imagem pronta permanece como alternativa de deploy e rastreabilidade.
+
+## Correções encontradas pelos hooks
+
+O teste de navegação deixou de esperar o atraso artificial do catálogo fictício; os dados e as regras da interface continuam os mesmos. O encerramento de WebSocket agora libera a inscrição na sala antes de aguardar tarefas canceladas e protege essa espera contra cancelamento externo. Um teste de cancelamento repetido comprova que a capacidade da sala é liberada mesmo durante a parada forçada.
+
+Última validação completa: **119 testes backend e 22 frontend aprovados**. Código no commit `d052fca`, enviado à main sem pular hooks. Não existe URL pública da aplicação até concluir a criação do host, volume e frontend.

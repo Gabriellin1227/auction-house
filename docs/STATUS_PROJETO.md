@@ -156,3 +156,7 @@ Validação desta continuação: **112 testes backend e 20 frontend aprovados**,
 ## Publicação: progresso atual
 
 Código completo enviado na main no commit `40ced9e`; `docs/` está versionado. Vercel vinculada, Neon autenticado em organização Free, banco isolado criado e migrations aplicadas sem diferenças de schema. Opção paga Render recusada; alternativa Northflank Free em preparação. A conta Northflank está conectada e exige verificação manual de cartão, autorizada apenas para o gratuito. Nenhuma URL pública foi entregue e nenhum serviço pago foi criado. Roteiro ativo: [DEPLOY_GRATUITO.md](DEPLOY_GRATUITO.md).
+
+## Atualização da preparação gratuita
+
+Código `d052fca` na main, CI e imagem aprovados remotamente; 119 testes backend e 22 frontend. Corrigidos atraso fictício no teste de navegação e limpeza da sala WebSocket sob cancelamento repetido. Vercel/Neon conectados, banco migrado, configuração Northflank Free preparada. A plataforma ainda bloqueia a criação do serviço/volume até a verificação manual do cartão. Nenhum site público ou recurso pago criado.

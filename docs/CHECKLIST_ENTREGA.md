@@ -99,3 +99,7 @@ A opção paga do Render foi recusada pelo desenvolvedor. Nenhum serviço pago f
 ## Preparação concluída nesta continuação
 
 Commit `40ced9e` publicado na main com 118 testes backend e 22 frontend aprovados. Neon autenticado, organização Free confirmada, banco isolado criado e migrations aplicadas sem diferenças de schema. Vercel vinculada. Conta Northflank Free conectada; verificação manual do cartão autorizada somente para o plano gratuito, sem autorização de cobrança. Volume persistente e deploy público ainda pendentes.
+
+## Atualização: host gratuito preparado
+
+Commit `d052fca` publicado; 119 testes backend e 22 frontend aprovados. CI remoto e publicação da imagem Docker concluíram com sucesso; pull anônimo da imagem confirmado. Banco Neon já migrado. Serviço Northflank preparado com 512 MB, volume gratuito de 6 GB e onze variáveis privadas conferidas. Não foi criado recurso pago. Bloqueio atual: concluir manualmente a verificação do cartão no Northflank para criar os recursos Free; ainda faltam publicação, seed no volume remoto e validação pública.
