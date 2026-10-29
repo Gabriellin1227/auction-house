@@ -141,3 +141,50 @@ def test_public_socket_rejects_unknown_lot_and_commands(client, market):
         with pytest.raises(WebSocketDisconnect) as error:
             socket.receive_json()
         assert error.value.code == 1008
+
+
+def test_repeated_socket_cancellation_releases_room_capacity(monkeypatch):
+    from contextlib import suppress
+    from types import SimpleNamespace
+
+    from app.events.router import lot_room
+
+    monkeypatch.setattr("app.events.router.exists", lambda *_: None)
+
+    async def scenario():
+        connected, cleaning, never = asyncio.Event(), asyncio.Event(), asyncio.Event()
+        hub = RoomHub(max_connections=1)
+
+        class Socket:
+            app = SimpleNamespace(
+                state=SimpleNamespace(room_hub=hub, event_engine=None)
+            )
+
+            async def accept(self):
+                pass
+
+            async def send_json(self, message):
+                connected.set()
+
+            async def receive(self):
+                try:
+                    await never.wait()
+                finally:
+                    cleaning.set()
+                    await never.wait()
+
+        task = asyncio.create_task(lot_room(Socket(), uuid4()))
+        await asyncio.wait_for(connected.wait(), 2)
+        await asyncio.sleep(0)
+        task.cancel()
+        await asyncio.wait_for(cleaning.wait(), 2)
+        task.cancel()
+        with suppress(asyncio.CancelledError):
+            await task
+        assert hub.connections == 0 and not hub.rooms
+        # Capacity remains usable after forced shutdown, without restarting API.
+        replacement = uuid4()
+        queue = hub.subscribe(replacement)
+        hub.unsubscribe(replacement, queue)
+
+    asyncio.run(scenario())

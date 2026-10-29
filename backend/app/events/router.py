@@ -1,6 +1,7 @@
 import asyncio
 from uuid import UUID
 
+from anyio import CancelScope
 from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
 
@@ -61,7 +62,10 @@ async def lot_room(socket: WebSocket, lot_id: UUID):
     except (WebSocketDisconnect, OSError, RuntimeError, TimeoutError):
         pass
     finally:
+        # Release capacity before an await: repeated shutdown cancellation must
+        # never leave a disconnected client subscribed to the room.
+        hub.unsubscribe(lot_id, queue)
         for task in tasks:
             task.cancel()
-        await asyncio.gather(*tasks, return_exceptions=True)
-        hub.unsubscribe(lot_id, queue)
+        with CancelScope(shield=True):
+            await asyncio.gather(*tasks, return_exceptions=True)
