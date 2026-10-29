@@ -152,3 +152,7 @@ Validação desta continuação: **112 testes backend e 20 frontend aprovados**,
 ## Conferência de entrega em 28/10/2026
 
 Última suíte: 118 testes backend e 22 frontend aprovados. Persistência da imagem e auditoria válida/ancorada confirmadas após reiniciar a imagem Render. Projeto Vercel criado, sem deploy; Neon e Render ainda sem autenticação confirmada. Último commit remoto continua 9814237; implementação atual ainda local. Checklist completa em [CHECKLIST_ENTREGA.md](CHECKLIST_ENTREGA.md).
+
+## Publicação: progresso atual
+
+Código completo enviado na main no commit `40ced9e`; `docs/` está versionado. Vercel vinculada, Neon autenticado em organização Free, banco isolado criado e migrations aplicadas sem diferenças de schema. Opção paga Render recusada; alternativa Northflank Free em preparação. A conta Northflank está conectada e exige verificação manual de cartão, autorizada apenas para o gratuito. Nenhuma URL pública foi entregue e nenhum serviço pago foi criado. Roteiro ativo: [DEPLOY_GRATUITO.md](DEPLOY_GRATUITO.md).

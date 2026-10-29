@@ -198,6 +198,14 @@ Cobertura inclui autenticação/papéis, CRUDs, snapshot offline, depósito idem
 
 Husky/lint-staged: formatação/lint no pre-commit, Conventional Commits no commit-msg e `npm run check` no pre-push. CI repete frontend/backend/build e valida mensagens em PRs. Nenhum hook cria commits automaticamente.
 
+## Publicação gratuita em preparação
+
+A opção escolhida é **Vercel + Neon + Northflank Sandbox**, condicionada à disponibilidade de volume persistente dentro da franquia gratuita. Vercel e Neon já estão autenticados; o banco isolado do leilão foi criado. Cadastro/acesso ao Northflank e publicação ainda estão pendentes. Nenhum serviço pago do Render foi criado; o `render.yaml` abaixo é somente uma alternativa paga.
+
+O compute Neon foi fixado em 0,25 CU. O worker mantém o banco ativo: a franquia anunciada de 100 CU-h por projeto equivale a cerca de 400 horas nesse tamanho, não um mês inteiro de operação contínua. Não habilitar cobrança automática para ampliar essa franquia.
+
+Roteiro e limites: [deploy gratuito](docs/DEPLOY_GRATUITO.md). **Ainda não há URL pública desta aplicação.**
+
 ## Publicação preparada: Vercel, Neon e Render
 
 A configuração está no código; **a aplicação ainda não foi publicada**.

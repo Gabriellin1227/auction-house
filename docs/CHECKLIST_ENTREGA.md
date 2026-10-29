@@ -2,7 +2,7 @@
 
 ## Conclusão
 
-A implementação principal está pronta para validação pública. A entrega ainda não está concluída: não existe deploy público desta aplicação, a versão atual não foi commitada/enviada e faltam acessos/configurações de infraestrutura.
+A implementação principal está pronta para validação pública. A entrega ainda não está concluída: não existe deploy público desta aplicação, o código foi enviado no commit `40ced9e`, mas faltam acesso ao host gratuito e configurações de infraestrutura.
 
 Esta conferência considera o código local, os logs dos testes, uma consulta real ao GitHub e à Vercel e as páginas 5 e 7 do PDF fornecido. Os requisitos funcionais detalhados estão mapeados em `MATRIZ_REQUISITOS_PDF.md`. Não representa nova inspeção visual completa nem teste em produção.
 
@@ -44,7 +44,7 @@ Não foi necessário repetir a suíte nesta conferência: nenhuma implementaçã
 
 ### Estado do Git
 
-Último commit local e remoto conferido: `9814237` (`docs: explica eventos rest e roteiro de entregas`). A implementação posterior está na árvore de trabalho, com arquivos modificados e novos ainda sem commit. O Render não terá esse código ao construir a branch remota até que o push seja realizado.
+Último commit da implementação completa enviado à branch `main`: `40ced9e` (`feat: prepara leiloes completos e infraestrutura de deploy`). O push executou os hooks e aprovou 118 testes backend e 22 frontend. A documentação também passou a acompanhar o repositório.
 
 O repositório público já existe; não é necessário criar outro para separar frontend e backend. O projeto é um monorepo.
 
@@ -52,7 +52,7 @@ O repositório público já existe; não é necessário criar outro para separar
 
 - **Vercel:** autenticada; projeto criado, nenhum deploy de produção.
 - **Render:** autenticação concluída; token salvo e workspace `My Workspace` consultável. O serviço pago ainda não foi provisionado.
-- **Neon:** não havia credencial salva no volume da CLI. O retorno para localhost falhou anteriormente; login foi reiniciado pela rede do host Docker, com espera local ampliada. Ainda falta confirmar autorização concluída.
+- **Neon:** autenticação concluída e projeto isolado `yorknew-auction-house` criado. Conexões privadas não devem ser publicadas.
 
 Nenhum token, senha ou URL de conexão deve ser registrado neste arquivo.
 
@@ -91,3 +91,11 @@ Tema claro e cancelamento com estorno após lances são opcionais no PDF; não b
 - [Matriz dos requisitos do PDF](MATRIZ_REQUISITOS_PDF.md)
 - [Seed e preparação do deploy](SEED_E_PREPARACAO_DEPLOY.md)
 - [Auditoria e checkpoints](AUDITORIA_PUBLICA_CHECKPOINTS.md)
+
+## Orçamento zero
+
+A opção paga do Render foi recusada pelo desenvolvedor. Nenhum serviço pago foi criado. O roteiro ativo passou a ser [DEPLOY_GRATUITO.md](DEPLOY_GRATUITO.md): Vercel, Neon e Northflank Sandbox, sujeito à confirmação de volume persistente na franquia. Os passos antigos de provisionar Render são a alternativa paga, não ações aprovadas.
+
+## Preparação concluída nesta continuação
+
+Commit `40ced9e` publicado na main com 118 testes backend e 22 frontend aprovados. Neon autenticado, organização Free confirmada, banco isolado criado e migrations aplicadas sem diferenças de schema. Vercel vinculada. Conta Northflank Free conectada; verificação manual do cartão autorizada somente para o plano gratuito, sem autorização de cobrança. Volume persistente e deploy público ainda pendentes.
