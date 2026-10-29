@@ -8,6 +8,12 @@ import {
 } from '@testing-library/react'
 import App from '../src/App'
 
+// Navigation assertions don't depend on the demo's simulated network latency.
+vi.mock('../src/data/mock', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../src/data/mock')>()
+  return { ...actual, delay: () => Promise.resolve() }
+})
+
 beforeEach(() => {
   window.history.replaceState({}, '', '/')
 })
