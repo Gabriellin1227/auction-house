@@ -8,10 +8,10 @@ O destino pretendido é:
 
 | Parte             | Serviço                       | Estado                                                                                                           |
 | ----------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Interface React   | Vercel                        | Autenticada, projeto vinculado; sem deploy público                                                               |
+| Interface React   | Vercel                        | Publicada: https://yorknew-auction-house.vercel.app                                                              |
 | PostgreSQL        | Neon                          | Autenticado; projeto isolado `yorknew-auction-house` criado em AWS us-east-1, PostgreSQL 17 e compute de 0,25 CU |
-| API + worker      | Northflank Sandbox            | Conta Free conectada; verificação manual do cartão e confirmação do volume pendentes                             |
-| Imagens + journal | Volume persistente do serviço | Opção gratuita de 6 GB confirmada no formulário; criação depende da verificação da conta                         |
+| API + worker      | Northflank Sandbox            | Conta Free verificada; serviço saudável e publicado                                                              |
+| Imagens + journal | Volume persistente do serviço | Volume gratuito yorknew-data criado e anexado em /data                                                           |
 
 Essa tabela registra preparação; não significa que o site está publicado.
 
@@ -23,7 +23,7 @@ Referência: [limites do Render Free](https://render.com/docs/free).
 
 ## Alternativa a confirmar no Northflank
 
-O plano Sandbox anunciado inclui dois serviços, dois jobs, um banco/addon, serviços sem suspensão e franquia de até US$ 20 mensais em recursos, sem cartão. A disponibilidade efetiva e as cotas devem ser conferidas na conta. Não fazer upgrade para um plano pago ou cadastrar cartão para completar este roteiro.
+O plano Sandbox anunciado inclui dois serviços, dois jobs, um banco/addon, serviços sem suspensão e franquia de até US$ 20 mensais em recursos, sem cartão. A disponibilidade efetiva e as cotas devem ser conferidas na conta. Não fazer upgrade para um plano pago. A verificação manual do cartão foi autorizada e concluída pelo desenvolvedor.
 
 O primeiro objetivo é usar **um serviço combinado** com API e worker, uma instância e volume de 6 GB. O Dockerfile `backend/Dockerfile.render` é reaproveitável: o nome foi escolhido para o primeiro destino, mas o comando `python -m app.deploy` não depende da API do Render. Ele usa PostgreSQL externo, variáveis de ambiente e o diretório persistente `/data`.
 
@@ -92,13 +92,13 @@ Referência: [franquia atual do Neon Free](https://neon.com/blog/neon-free-plan-
 7. Percorrer a [checklist de entrega](CHECKLIST_ENTREGA.md) na URL pública.
 8. Atualizar README e documentação com as URLs reais e os limites efetivamente verificados.
 
-O repositório público está atualizado. A autenticação do Northflank é a próxima dependência externa; a interface ficou em `Connecting` no navegador integrado durante a preparação.
+O roteiro foi executado em 29/10/2026. Consulte [VALIDACAO_DEPLOY.md](VALIDACAO_DEPLOY.md) para as evidências e pendências reais.
 
 ## Verificação observada na conta
 
 O painel confirmou `Team Free`, mas mostrou `Payment method required` mesmo para um serviço que informa não cobrar. Isso contradiz a indicação de cadastro sem cartão da página pública de preços para esta conta. O desenvolvedor autorizou verificar manualmente a conta gratuita; não autorizou serviço ou volume pago.
 
-O cadastro/login no Northflank está concluído. Permanecem a verificação manual do cartão, a conexão do repositório e a confirmação de volume dentro da franquia. Não usar a alternativa Render paga para contornar esse bloqueio. O banco remoto já está migrado; ainda não houve publicação da aplicação nem seed remoto.
+Cadastro, verificação manual e vínculo GitHub concluídos. Serviço e volume foram criados como Free. Banco migrado, seed remoto executado e frontend publicado. Não usar a alternativa Render paga.
 
 ## Imagem para deploy sem integração GitHub no host
 
@@ -108,21 +108,24 @@ Destino: `ghcr.io/gabriellin1227/auction-house-api`. Antes de usá-la como image
 
 No Northflank, a modalidade **Deployment** executa a imagem pronta. Isso evita depender do vínculo GitHub App/time, que ainda não estava aparecendo como associado mesmo com o aplicativo já instalado na conta. Não foi necessário alterar as permissões existentes do GitHub App.
 
-## Estado confirmado do serviço preparado
+## Provisionamento confirmado em 29/10/2026
 
-- Serviço `yorknew-api`, projeto `Default`, região US - Central.
-- Fonte GitHub `Gabriellin1227/auction-house`, branch `main`; vínculo agora disponível no formulário.
-- Contexto `/backend`, Dockerfile `/backend/Dockerfile.render`, validado pelo painel.
-- Plano gratuito `nf-compute-20`: 0,2 vCPU compartilhada, 512 MB, uma instância.
-- Porta pública HTTP 10000, healthcheck `/ready`, intervalo de 10 s e timeout de 5 s.
-- Onze variáveis de execução preenchidas e comparadas com a configuração privada; nenhum segredo incluído no build/frontend/Git.
-- Volume `yorknew-data`, `/data`, 6 GB: o painel informa que não será cobrado neste projeto Free.
-- Cadastro de cartão ainda precisa ser concluído manualmente pelo desenvolvedor. O painel continua informando falta de pagamento padrão verificado. A tentativa de criação do volume parou na validação de nome/país do formulário de pagamento; nenhum volume nem serviço foi criado.
+- Conta `GabrielLin’s Team`, plano Free; verificação de cartão concluída pelo desenvolvedor.
+- Serviço `yorknew-api`, projeto `Default`, região US - Central, criado com imagem pública do GHCR.
+- Plano `nf-compute-20`: 0,2 vCPU, 512 MB e uma instância.
+- Volume `yorknew-data`: 6 GB, ReadWriteOnce, montado em `/data`, identificado como Free no painel e anexado ao serviço.
+- Porta pública HTTP 10000 e readiness `GET /ready`.
+- Variáveis privadas configuradas no runtime; segredos fora do Git e do frontend.
+- Endereço provisionado: `https://http--yorknew-api--fvlfd7l979w8.code.run`. Endereço provisionado não comprova API saudável.
 
-A imagem também está publicada e disponível sem autenticação em `ghcr.io/gabriellin1227/auction-house-api:latest`. Workflow de publicação e CI do commit `d052fca` concluíram com sucesso. A modalidade Combined (Git + build) já está preparada no Northflank; a imagem pronta permanece como alternativa de deploy e rastreabilidade.
+Na primeira inicialização, a conexão PostgreSQL falhou porque o processo sem privilégios herdou o diretório pessoal `/root`, sem permissão para consultar o certificado padrão do libpq. O Dockerfile agora define `HOME=/home/app`; o mesmo ajuste foi aplicado ao runtime. TLS permanece habilitado. Conferir `/ready` após a atualização antes de publicar a interface.
+
+Uma credencial de automação válida por um dia foi autorizada para esta implantação. Seu papel permite gerenciar serviços, mas não ler volumes, alterar segredos ou executar comandos no contêiner. Essas operações são feitas pelo painel; não ampliar permissões implicitamente. Revogar a credencial ao concluir.
+
+Saúde, seed remoto e publicação da Vercel foram confirmados. Os testes públicos estão registrados em [VALIDACAO_DEPLOY.md](VALIDACAO_DEPLOY.md).
 
 ## Correções encontradas pelos hooks
 
 O teste de navegação deixou de esperar o atraso artificial do catálogo fictício; os dados e as regras da interface continuam os mesmos. O encerramento de WebSocket agora libera a inscrição na sala antes de aguardar tarefas canceladas e protege essa espera contra cancelamento externo. Um teste de cancelamento repetido comprova que a capacidade da sala é liberada mesmo durante a parada forçada.
 
-Última validação completa: **119 testes backend e 22 frontend aprovados**. Código no commit `d052fca`, enviado à main sem pular hooks. Não existe URL pública da aplicação até concluir a criação do host, volume e frontend.
+Última validação completa: **119 testes backend e 22 frontend aprovados**. Código no commit `d052fca`, enviado à main sem pular hooks. A publicação pública posterior está documentada em [VALIDACAO_DEPLOY.md](VALIDACAO_DEPLOY.md).

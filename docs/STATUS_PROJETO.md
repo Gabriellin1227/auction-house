@@ -1,12 +1,16 @@
 # Yorknew — estado do projeto e continuação da v1
 
-Atualizado em 28/10/2026. Este documento descreve código e validação reais; não significa conclusão do desafio.
+Atualizado em 29/10/2026. Este documento descreve código e validação reais; não significa conclusão do desafio.
 
 ## Marco v1
 
-A base anterior foi preservada no commit local `0d10edd`, tag anotada `v1`, com versão npm 1.0.0. O documento histórico [VERSAO_V1.md](VERSAO_V1.md) está nesse marco. Nenhum push, release público ou deploy remoto foi executado.
+A base anterior foi preservada no commit local `0d10edd`, tag anotada `v1`, com versão npm 1.0.0. O documento histórico [VERSAO_V1.md](VERSAO_V1.md) está nesse marco. Esse trecho descreve o marco histórico; o estado atual de publicação está em [VALIDACAO_DEPLOY.md](VALIDACAO_DEPLOY.md).
 
-Os CRUDs posteriores à tag foram registrados em `5649e45` e integrados à `main` local pelo merge `bb20f3b`. A entrega de lances foi registrada em `fda1e78`; guias iniciais em `9814237`. Ambos foram enviados à main remota por HTTPS. As entregas 5 (outbox/WebSocket), 6 (worker/liquidação/comprovante) e 7 (auditoria/checkpoints) estão implementadas no diretório de trabalho, sem novo commit/push. Para consultar o marco sem perder alterações, use `git show v1:VERSAO_V1.md`; não faça checkout/reset sobre o trabalho atual.
+Os CRUDs posteriores à tag foram registrados em `5649e45` e integrados à `main` local pelo merge `bb20f3b`. A entrega de lances foi registrada em `fda1e78`; guias iniciais em `9814237`. Ambos foram enviados à main remota por HTTPS. As entregas 5 (outbox/WebSocket), 6 (worker/liquidação/comprovante) e 7 (auditoria/checkpoints) foram versionadas e enviadas à main; o deploy público está documentado em [VALIDACAO_DEPLOY.md](VALIDACAO_DEPLOY.md). Para consultar o marco sem perder alterações, use `git show v1:VERSAO_V1.md`; não faça checkout/reset sobre o trabalho atual.
+
+## Publicação em 29/10/2026
+
+Site: https://yorknew-auction-house.vercel.app. API e worker saudáveis no Northflank Free, PostgreSQL no Neon e volume gratuito de 6 GB preservado após rollout. Seed remoto, lances/WebSocket, liquidação, comprovante e auditoria públicos validados. Token temporário revogado. Evidências atuais em [VALIDACAO_DEPLOY.md](VALIDACAO_DEPLOY.md); os registros abaixo descrevem etapas anteriores.
 
 ## Estado atual
 

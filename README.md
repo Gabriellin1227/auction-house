@@ -2,7 +2,9 @@
 
 Casa de leilões desenvolvida para o teste técnico Elite Dev da Verzel. Leiloeiros importam obras de uma API pública e publicam lotes; licitantes depositam saldo fictício, disputam por lances e recebem comprovantes públicos. O histórico possui auditoria pública com hashes, HMAC e checkpoints externos ao banco.
 
-Repositório: [Gabriellin1227/auction-house](https://github.com/Gabriellin1227/auction-house). **Deploy público: pendente.** Este README descreve a aplicação local; a entrega do desafio ainda depende do deploy e das pendências ao final.
+Site público: [yorknew-auction-house.vercel.app](https://yorknew-auction-house.vercel.app). API e Swagger: [documentação interativa](https://http--yorknew-api--fvlfd7l979w8.code.run/docs). Repositório: [Gabriellin1227/auction-house](https://github.com/Gabriellin1227/auction-house).
+
+Deploy: Vercel + Neon + Northflank Free, com volume persistente. Consulte [validação pública e limites](docs/VALIDACAO_DEPLOY.md) e a [checklist de entrega](docs/CHECKLIST_ENTREGA.md). A revisão humana final e o envio à Verzel continuam pendentes.
 
 ## Tecnologias e estrutura
 
@@ -13,7 +15,7 @@ React/TypeScript e Vite; FastAPI/Python 3.12; PostgreSQL 17; SQLAlchemy e Alembi
 - `backend/app`: auth, users, catalog, lots, bids, wallets, settlements, audit e events.
 - `backend/migrations`: migration inicial das dez tabelas.
 - `backend/tests` e `frontend/test`: testes automatizados.
-- `docs/`: guias das entregas e matriz do PDF. A pasta continua ignorada pelo Git por configuração do projeto; este README contém as instruções essenciais para executar um clone.
+- `docs/`: guias das entregas e matriz do PDF. A pasta é versionada junto com o código.
 - Um `package-lock.json` na raiz para JavaScript; `backend/uv.lock` para Python.
 
 ## Iniciar com Docker
@@ -198,45 +200,30 @@ Cobertura inclui autenticação/papéis, CRUDs, snapshot offline, depósito idem
 
 Husky/lint-staged: formatação/lint no pre-commit, Conventional Commits no commit-msg e `npm run check` no pre-push. CI repete frontend/backend/build e valida mensagens em PRs. Nenhum hook cria commits automaticamente.
 
-## Publicação gratuita em preparação
+## Publicação gratuita
 
-A opção escolhida é **Vercel + Neon + Northflank Sandbox**, condicionada à disponibilidade de volume persistente dentro da franquia gratuita. Vercel e Neon já estão autenticados; o banco isolado do leilão foi criado. Cadastro/acesso ao Northflank e publicação ainda estão pendentes. Nenhum serviço pago do Render foi criado; o `render.yaml` abaixo é somente uma alternativa paga.
+Ambiente publicado em Vercel + Neon + Northflank Free. A interface usa `VITE_USE_MOCK=false` e a URL HTTPS real da API, sem `/api`. `vercel.json` configura build Vite e fallback das páginas React.
 
-O compute Neon foi fixado em 0,25 CU. O worker mantém o banco ativo: a franquia anunciada de 100 CU-h por projeto equivale a cerca de 400 horas nesse tamanho, não um mês inteiro de operação contínua. Não habilitar cobrança automática para ampliar essa franquia.
+O Northflank executa a imagem de `backend/Dockerfile.render` (contexto `backend/`), em uma instância de 512 MB, com volume gratuito de 6 GB em `/data`. O nome do Dockerfile é histórico; nenhum serviço pago do Render foi criado. `render.yaml` permanece apenas como alternativa paga.
 
-Roteiro e limites: [deploy gratuito](docs/DEPLOY_GRATUITO.md). **Ainda não há URL pública desta aplicação.**
+`python -m app.deploy` aplica migrations e inicia API/worker juntos. Se um processo termina, o supervisor encerra o serviço. `/ready` confere banco e heartbeat. Rollouts interrompem brevemente o serviço. Não aumentar workers/réplicas sem barramento compartilhado.
 
-## Publicação preparada: Vercel, Neon e Render
+Conexões Neon com TLS, chaves independentes e origem CORS ficam no runtime privado. `MEDIA_DIR=/data/media`, `AUDIT_DIR=/data/audit`, `WORKER_REQUIRED=true` e `EVENTS_ENABLED=true`. O seed foi executado no contêiner com o volume montado; confira os comandos em [VALIDACAO_DEPLOY.md](docs/VALIDACAO_DEPLOY.md). Não executar seed local contra banco remoto esperando transferir imagens.
 
-A configuração está no código; **a aplicação ainda não foi publicada**.
+O Neon foi fixado em 0,25 CU. O worker mantém o banco ativo: 100 CU-h equivalem a cerca de 400 horas nesse tamanho, sem garantir um mês inteiro de operação contínua. Não habilitar cobrança automática para ampliar a franquia. Limites e roteiro em [DEPLOY_GRATUITO.md](docs/DEPLOY_GRATUITO.md).
 
-- Vercel: raiz do repositório, Node 24, `npm ci`, `npm run build`, saída `frontend/dist`. `vercel.json` configura o fallback das páginas React.
-- Frontend: `VITE_USE_MOCK=false` e `VITE_API_URL=https://SEU-SERVICO.onrender.com`, sem `/api`. Reconstruir o frontend ao alterar essas variáveis.
-- Neon: `DATABASE_URL` com TLS e `DATABASE_URL_UNPOOLED` com a conexão direta para migrations; preservar os parâmetros fornecidos pelo painel.
-- Render: `render.yaml` usa plano pago `starter` e disco persistente de 1 GB em `/data`. Confirmar custo antes de provisionar. O Dockerfile é `backend/Dockerfile.render`, com contexto `backend/`.
-- Backend: `CORS_ORIGINS=["https://SEU-PROJETO.vercel.app"]`, chaves independentes `AUTH_SECRET`/`AUDIT_SECRET`, `MEDIA_DIR=/data/media`, `AUDIT_DIR=/data/audit`, `WORKER_REQUIRED=true`, `EVENTS_ENABLED=true`.
-
-O comando `python -m app.deploy` aplica migrations antes de iniciar API e worker juntos. Se um processo terminar, o supervisor encerra o serviço; `/ready` confere banco e heartbeat do worker. Um serviço único permite que ambos acessem o disco Render. Deploys com esse disco têm pausa; não escalar para múltiplas instâncias.
-
-Após publicar, executar `python -m app.seed --demo` no **Shell do serviço Render em execução**, com acesso ao disco. Executar seed local contra o Neon não transfere as imagens para o Render. Conferir lote aberto, imagens, login/depósitos, disputa em duas sessões, WebSocket, liquidação, comprovante e auditoria pelo domínio público.
-
-Para banco remoto novo, o Blueprint pode gerar chaves novas. Ao transferir histórico existente, preservar a chave de auditoria correspondente, o journal e as imagens. Não publicar credenciais de banco/chaves no frontend ou Git.
+Ao transferir histórico, preservar chave de auditoria, journal e imagens. Não publicar credenciais no Git/frontend.
 
 ## Estado da entrega e pendências
 
-Implementados localmente: contas, catálogo persistido, lotes, carteira, lances, eventos/WebSocket, worker, liquidação, comprovantes, participações/resultados e auditoria com checkpoints.
+API, interface e banco publicados. Foram confirmados login, depósitos, disputa com dois clientes WebSocket, reservas, prorrogação, liquidação de R$ 12, comprovante público, auditoria válida/ancorada e persistência após reinício. Há um lote do seed aberto por 24 horas; revalidar antes de enviar.
 
-Ainda faltam:
-
-- Deploy público e validação dos fluxos na URL de entrega.
-- Provisionar e validar Render com API/worker e disco persistente; `render.yaml` e `backend/Dockerfile.render` estão preparados. A topologia atual suporta **uma instância/processo da API**; não aumentar workers/réplicas sem barramento compartilhado.
-- Revisão humana final e conferência completa do PDF no ambiente público.
-- Backups operacionais e teste de recuperação, rotação de chaves e revisão ampla de acessibilidade.
+Faltam a revisão humana final, conferência completa do PDF e envio dos links à Verzel. Backups com teste de recuperação, rotação de chaves e revisão ampla de acessibilidade são melhorias operacionais.
 
 Cancelamento com estorno após lances e tema claro são opcionais e não foram implementados. Recuperação de senha, nota fiscal, revenda e aplicativo nativo ficam fora do escopo indicado no desafio.
 
 ## Uso de IA e revisão
 
-IA foi utilizada para apoiar a estruturação do projeto, implementação de backend/frontend, testes e documentação, a partir das decisões e solicitações do desenvolvedor. As validações automatizadas executadas estão registradas nos guias de cada entrega. A revisão humana final e a validação do deploy ainda precisam ser concluídas pelo responsável antes do envio; este texto não declara que essas etapas já ocorreram.
+IA foi utilizada para apoiar a estruturação do projeto, implementação de backend/frontend, testes e documentação, a partir das decisões e solicitações do desenvolvedor. As validações automatizadas executadas estão registradas nos guias de cada entrega. A validação técnica pública está registrada em [VALIDACAO_DEPLOY.md](docs/VALIDACAO_DEPLOY.md). A revisão humana final ainda precisa ser concluída pelo responsável antes do envio; este texto não declara que essa revisão já ocorreu.
 
 Documentação local complementar: `docs/ENTREGAS.md`, `docs/MATRIZ_REQUISITOS_PDF.md` e `docs/AUDITORIA_PUBLICA_CHECKPOINTS.md`.
