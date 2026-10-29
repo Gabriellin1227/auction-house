@@ -99,3 +99,11 @@ O repositório público está atualizado. A autenticação do Northflank é a pr
 O painel confirmou `Team Free`, mas mostrou `Payment method required` mesmo para um serviço que informa não cobrar. Isso contradiz a indicação de cadastro sem cartão da página pública de preços para esta conta. O desenvolvedor autorizou verificar manualmente a conta gratuita; não autorizou serviço ou volume pago.
 
 O cadastro/login no Northflank está concluído. Permanecem a verificação manual do cartão, a conexão do repositório e a confirmação de volume dentro da franquia. Não usar a alternativa Render paga para contornar esse bloqueio. O banco remoto já está migrado; ainda não houve publicação da aplicação nem seed remoto.
+
+## Imagem para deploy sem integração GitHub no host
+
+O workflow `.github/workflows/publish-api.yml` constrói `backend/Dockerfile.render` e publica a imagem no GitHub Container Registry usando somente o `GITHUB_TOKEN` temporário do job. Não inclui banco, senha, `.env` ou chave de auditoria na imagem. As tags são `latest` e `sha-COMMIT_COMPLETO`.
+
+Destino: `ghcr.io/gabriellin1227/auction-house-api`. Antes de usá-la como imagem pública no Northflank, conferir a conclusão do workflow, a visibilidade do pacote e um pull anônimo. A publicação do pacote não equivale a site publicado.
+
+No Northflank, a modalidade **Deployment** executa a imagem pronta. Isso evita depender do vínculo GitHub App/time, que ainda não estava aparecendo como associado mesmo com o aplicativo já instalado na conta. Não foi necessário alterar as permissões existentes do GitHub App.
