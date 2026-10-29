@@ -222,8 +222,10 @@ Faltam a revisão humana final, conferência completa do PDF e envio dos links �
 
 Cancelamento com estorno após lances e tema claro são opcionais e não foram implementados. Recuperação de senha, nota fiscal, revenda e aplicativo nativo ficam fora do escopo indicado no desafio.
 
-## Uso de IA e revisão
+## Uso de IA no desenvolvimento
 
-IA foi utilizada para apoiar a estruturação do projeto, implementação de backend/frontend, testes e documentação, a partir das decisões e solicitações do desenvolvedor. As validações automatizadas executadas estão registradas nos guias de cada entrega. A validação técnica pública está registrada em [VALIDACAO_DEPLOY.md](docs/VALIDACAO_DEPLOY.md). A revisão humana final ainda precisa ser concluída pelo responsável antes do envio; este texto não declara que essa revisão já ocorreu.
+O desafio foi recebido na quinta-feira, 22/10/2026, com prazo final em 29/10/2026. Durante esse período, utilizei o Codex, assistente de IA da OpenAI, como apoio ao desenvolvimento e à organização das entregas.
 
-Documentação local complementar: `docs/ENTREGAS.md`, `docs/MATRIZ_REQUISITOS_PDF.md` e `docs/AUDITORIA_PUBLICA_CHECKPOINTS.md`.
+O auxílio se concentrou principalmente na estruturação do ambiente, na orquestração e execução de testes, na configuração dos fluxos de CI/CD e na produção da documentação. Isso incluiu Docker, banco de dados e migrations, hooks de commit, verificações automatizadas e preparação do deploy.
+
+A IA também apoiou a implementação e correção de trechos do backend e do frontend, seguindo as decisões e orientações que defini para o projeto. As sugestões foram verificadas por testes automatizados e validações dos fluxos no ambiente publicado. A responsabilidade pelas decisões técnicas, pela revisão do código e pela entrega permanece comigo.
